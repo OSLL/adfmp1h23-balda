@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/header"
+    android:background="@color/light_grey"
+    app:layout_constraintTop_toTopOf="parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageButton
+      android:id="@+id/backButton"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      android:src="@drawable/baseline_arrow_back_24"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:contentDescription="@string/todo" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+  <TextView
+    android:id="@+id/gameTitle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="110dp"
+    android:text="@string/app_title"
+    android:textAlignment="center"
+    android:textColor="?attr/colorOnBackground"
+    android:textSize="50sp"
+    app:layout_constraintTop_toTopOf="parent" />
+  <LinearLayout
+    app:layout_constraintTop_toBottomOf="@id/gameTitle"
+    android:gravity="center"
+    android:layout_marginTop="40dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <EditText
+      android:id="@+id/player1Name"
+      android:background="@drawable/name_field_background"
+      android:layout_width="250dp"
+      android:layout_height="50dp"
+      android:padding="15dp"
+      android:inputType="text"
+      android:importantForAutofill="no"
+      tools:ignore="LabelFor" /> <!-- Hint will be added in runtime -->
+    <EditText
+      android:id="@+id/player2Name"
+      android:background="@drawable/name_field_background"
+      android:layout_marginTop="10dp"
+      android:layout_width="250dp"
+      android:layout_height="50dp"
+      android:padding="15dp"
+      android:inputType="text"
+      android:importantForAutofill="no"
+      tools:ignore="LabelFor" /> <!-- Hint will be added in runtime -->
+    <Button
+      android:id="@+id/playButton"
+      android:background="@drawable/button_background"
+      android:layout_marginTop="20dp"
+      android:layout_width="200dp"
+      android:layout_height="50dp"
+      android:text="@string/play" />
+  </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
