@@ -22,4 +22,12 @@
   <string name="player1Name">Имя игрока 1</string>
   <string name="player2">Игрок 2</string>
   <string name="player2Name">Имя игрока 2</string>
+
+  <string name="score">Счёт</string>
+  <string name="time">Время</string>
+  <string name="pause">Пауза</string>
+  <string name="turn">Ход</string>
+  <string name="menu">В меню</string>
+  <string name="pass">Пропуск</string>
+  <string name="tip">Помощь</string>
 </resources>
