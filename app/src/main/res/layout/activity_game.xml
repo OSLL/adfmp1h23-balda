@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  tools:context=".activity.GameActivity">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/score_board"
+    android:layout_width="187dp"
+    android:layout_height="wrap_content"
+    app:layout_constraintBottom_toTopOf="@+id/board_mock"
+    app:layout_constraintEnd_toStartOf="@+id/status"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="@+id/menu_button"
+    app:layout_constraintTop_toTopOf="parent">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/p1_name_score_row"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:background="@drawable/score_board_background"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/score_header">
+
+      <TextView
+        android:id="@+id/p1_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Juggernaut"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+      <TextView
+        android:id="@+id/p1_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="10"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/p1_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/p1_name" />
+
+      <TextView
+        android:id="@+id/p2_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Warlock"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/p1_name"
+        app:layout_constraintTop_toBottomOf="@+id/p1_name" />
+
+      <TextView
+        android:id="@+id/p2_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="20"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/p1_score"
+        app:layout_constraintTop_toTopOf="@+id/p2_name" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+      android:id="@+id/score_header"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/score"
+      android:textAlignment="center"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="24sp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:textStyle="bold" />
+
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/status"
+    android:layout_width="187dp"
+    android:layout_height="wrap_content"
+    app:layout_constraintEnd_toEndOf="@+id/tip_button"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/score_board"
+    app:layout_constraintTop_toTopOf="@+id/score_board">
+
+    <TextView
+      android:id="@+id/time_label"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/time"
+      android:textAlignment="center"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="24sp"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:layout_editor_absoluteX="65dp"
+      tools:textStyle="bold" />
+
+    <TextView
+      android:id="@+id/time_display"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="4dp"
+      android:text="03:15"
+      android:textAlignment="center"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="20sp"
+      app:layout_constraintTop_toBottomOf="@+id/time_label"
+      tools:layout_editor_absoluteX="66dp"
+      tools:textStyle="bold" />
+
+    <TextView
+      android:id="@+id/turn_display"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:text="Ход: Warlock"
+      android:textAlignment="center"
+      android:textColor="@color/white"
+      android:textSize="16sp"
+      app:layout_constraintTop_toBottomOf="@+id/time_display"
+      tools:layout_editor_absoluteX="0dp"
+      tools:textStyle="bold" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <TextView
+    android:id="@+id/board_mock"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/purple"
+    android:letterSpacing="1"
+    android:lineSpacingMultiplier="2"
+    android:paddingTop="32dp"
+    android:paddingBottom="32dp"
+    android:text="A A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A"
+    android:textAlignment="center"
+    android:textColor="@color/white"
+    android:textSize="16sp"
+    app:layout_constraintBottom_toTopOf="@+id/menu_button"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/score_board"
+    tools:textStyle="bold" />
+
+  <Button
+    android:id="@+id/menu_button"
+    android:layout_width="78dp"
+    android:layout_height="wrap_content"
+    android:drawableTop="@drawable/baseline_menu_36"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:text="@string/menu"
+    android:textSize="12sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/pause_button"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintHorizontal_weight="1"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/board_mock" />
+
+  <Button
+    android:id="@+id/pause_button"
+    android:layout_width="78dp"
+    android:layout_height="wrap_content"
+    android:drawableTop="@drawable/baseline_pause_36"
+    android:text="@string/pause"
+    android:textSize="12sp"
+    app:layout_constraintEnd_toStartOf="@+id/pass_button"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintHorizontal_weight="1"
+    app:layout_constraintStart_toEndOf="@+id/menu_button"
+    app:layout_constraintTop_toTopOf="@+id/menu_button" />
+
+  <Button
+    android:id="@+id/pass_button"
+    android:layout_width="78dp"
+    android:layout_height="wrap_content"
+    android:drawableTop="@drawable/baseline_skip_outline_36"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:text="@string/pass"
+    android:textSize="12sp"
+    app:layout_constraintEnd_toStartOf="@+id/tip_button"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintHorizontal_weight="1"
+    app:layout_constraintStart_toEndOf="@+id/pause_button"
+    app:layout_constraintTop_toTopOf="@+id/pause_button" />
+
+  <Button
+    android:id="@+id/tip_button"
+    android:layout_width="78dp"
+    android:layout_height="wrap_content"
+    android:drawableTop="@drawable/baseline_tip_36"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:text="@string/tip"
+    android:textSize="12sp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintHorizontal_weight="1"
+    app:layout_constraintStart_toEndOf="@+id/pass_button"
+    app:layout_constraintTop_toTopOf="@+id/pass_button" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

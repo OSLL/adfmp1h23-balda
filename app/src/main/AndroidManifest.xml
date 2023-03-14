@@ -22,6 +22,7 @@
     <activity android:name=".activity.HelpScreenActivity" android:parentActivityName=".activity.MainActivity" />
     <activity android:name=".activity.StatScreenActivity" android:parentActivityName=".activity.MainActivity" />
     <activity android:name=".activity.ChooseNameActivity" android:parentActivityName=".activity.MainActivity" />
+    <activity android:name=".activity.GameActivity" android:parentActivityName=".activity.ChooseNameActivity" />
   </application>
 
 </manifest>
