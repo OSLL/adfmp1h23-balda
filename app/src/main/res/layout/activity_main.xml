@@ -238,9 +238,9 @@
     android:id="@+id/topicSelector"
     android:layout_width="match_parent"
     android:layout_height="25dp"
-    android:layout_marginStart="5dp"
+    android:layout_marginStart="20dp"
     android:layout_marginTop="5dp"
-    android:layout_marginEnd="10dp"
+    android:layout_marginEnd="20dp"
     android:background="@drawable/button_background"
     android:contentDescription="@string/todo"
     app:layout_constraintTop_toBottomOf="@id/topicHeaderContainer" />

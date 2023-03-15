@@ -21,7 +21,7 @@ class ChooseNameActivity : AppCompatActivity() {
       NavUtils.navigateUpFromSameTask(this)
     }
 
-    val gameMode = GameMode.fromString(
+    val gameMode = GameMode.valueOf(
       intent.getStringExtra(IntentExtraNames.GAME_MODE)
         ?: error("Missing required extra property ${IntentExtraNames.GAME_MODE}")
     )
