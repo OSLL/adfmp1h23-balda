@@ -45,12 +45,12 @@ class MainActivity : AppCompatActivity() {
 
     findViewById<Button>(R.id.startGame1PlayerButton).setOnClickListener {
       val intent = Intent(this, ChooseNameActivity::class.java)
-        .putExtra(IntentExtraNames.GAME_MODE, GameMode.SINGLE_PLAYER.toString())
+        .putExtra(IntentExtraNames.GAME_MODE, GameMode.SINGLE_PLAYER.name)
       startActivity(intent)
     }
     findViewById<Button>(R.id.startGame2PlayerButton).setOnClickListener {
       val intent = Intent(this, ChooseNameActivity::class.java)
-        .putExtra(IntentExtraNames.GAME_MODE, GameMode.MULTIPLAYER.toString())
+        .putExtra(IntentExtraNames.GAME_MODE, GameMode.MULTIPLAYER.name)
       startActivity(intent)
     }
 
