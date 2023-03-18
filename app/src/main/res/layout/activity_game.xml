@@ -11,7 +11,7 @@
     android:id="@+id/score_board"
     android:layout_width="187dp"
     android:layout_height="wrap_content"
-    app:layout_constraintBottom_toTopOf="@+id/board_mock"
+    android:layout_marginTop="15dp"
     app:layout_constraintEnd_toStartOf="@+id/status"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="@+id/menu_button"
@@ -139,25 +139,16 @@
       tools:textStyle="bold" />
   </androidx.constraintlayout.widget.ConstraintLayout>
 
-  <TextView
-    android:id="@+id/board_mock"
+  <TableLayout
+    android:id="@+id/board"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/purple"
-    android:letterSpacing="1"
-    android:lineSpacingMultiplier="2"
-    android:paddingTop="32dp"
-    android:paddingBottom="32dp"
-    android:text="A A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A\nA A A A A A A A"
-    android:textAlignment="center"
-    android:textColor="@color/white"
-    android:textSize="16sp"
     app:layout_constraintBottom_toTopOf="@+id/menu_button"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/score_board"
-    tools:textStyle="bold" />
+    app:layout_constraintTop_toBottomOf="@+id/score_board">
+  </TableLayout>
 
   <Button
     android:id="@+id/menu_button"
@@ -173,7 +164,7 @@
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintHorizontal_weight="1"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/board_mock" />
+    android:layout_marginBottom="15dp"/>
 
   <Button
     android:id="@+id/pause_button"

@@ -1,20 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
   <style name="button">
     <item name="android:insetTop">0dp</item>
     <item name="android:insetBottom">0dp</item>
     <item name="backgroundTint">?attr/colorPrimary</item>
     <item name="android:textColor">?attr/colorOnPrimary</item>
   </style>
+
   <style name="button.green">
     <item name="backgroundTint">@color/green</item>
   </style>
+
   <style name="button.red">
     <item name="backgroundTint">@color/red</item>
   </style>
+
   <style name="icon_button">
     <item name="backgroundTint">@color/transparent</item>
     <item name="android:insetTop">0dp</item>
     <item name="android:insetBottom">0dp</item>
+  </style>
+
+  <style name="letter_background">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+
+    <item name="android:gravity">center_horizontal</item>
+  </style>
+
+  <style name="letter">
+    <item name="android:layout_width">40dp</item>
+    <item name="android:layout_height">40dp</item>
+
+    <item name="android:textColor">?attr/colorOnPrimary</item>
   </style>
 </resources>
