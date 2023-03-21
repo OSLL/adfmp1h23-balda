@@ -1,8 +1,10 @@
 package com.ifmo.balda.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,8 @@ class ChooseNameActivity : AppCompatActivity() {
         ?: error("Missing required extra property ${IntentExtraNames.GAME_MODE}")
     )
 
+    val gameIntent = Intent(this, GameActivity::class.java)
+
     when (gameMode) {
       GameMode.SINGLE_PLAYER -> {
         findViewById<EditText>(R.id.player2Name).visibility = View.GONE
@@ -46,6 +50,12 @@ class ChooseNameActivity : AppCompatActivity() {
         name2Edit.setText(R.string.player2)
         name2Edit.setSelection(name2Edit.text.length)
       }
+    }
+
+    findViewById<Button>(R.id.playButton).setOnClickListener {
+      findViewById<EditText>(R.id.player1Name).text.let { gameIntent.putExtra(IntentExtraNames.PLAYER_1_NAME, it) }
+      findViewById<EditText>(R.id.player2Name).text?.let { gameIntent.putExtra(IntentExtraNames.PLAYER_2_NAME, it) }
+      startActivity(gameIntent)
     }
   }
 }
