@@ -29,7 +29,6 @@ class ChooseNameActivity : AppCompatActivity() {
     )
 
     val gameIntent = Intent(this, GameActivity::class.java)
-      .putExtra(IntentExtraNames.GAME_MODE, gameMode.toString())
 
     when (gameMode) {
       GameMode.SINGLE_PLAYER -> {
