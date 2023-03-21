@@ -4,15 +4,244 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context=".MainActivity">
+  android:orientation="vertical"
+  tools:context=".activity.MainActivity">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/topControlsContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <Button
+      android:id="@+id/langButton"
+      style="@style/button"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_marginStart="10dp"
+      android:background="@drawable/button_background"
+      android:text="@string/lang_ru"
+      android:textSize="12sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+      android:id="@+id/statButton"
+      style="@style/button"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_marginStart="10dp"
+      android:background="@drawable/button_background"
+      android:contentDescription="@string/todo"
+      android:src="@drawable/baseline_bar_chart_24"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/langButton"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+      android:id="@+id/helpButton"
+      style="@style/icon_button"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_marginEnd="10dp"
+      android:contentDescription="@string/todo"
+      android:src="@drawable/baseline_help_outline_24"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
 
   <TextView
-    android:layout_width="wrap_content"
+    android:id="@+id/header"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Hello World!"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
+    android:layout_marginTop="110dp"
+    android:text="@string/app_title"
+    android:textAlignment="center"
+    android:textColor="?attr/colorOnBackground"
+    android:textSize="50sp"
     app:layout_constraintTop_toTopOf="parent" />
 
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/playButtonsContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="40dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/header">
+
+    <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
+      <Button
+        android:id="@+id/startGame1PlayerButton"
+        style="@style/button"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/button_background"
+        android:drawableTop="@drawable/outline_smart_toy_24"
+        android:text="@string/_1player"
+        android:textAlignment="center"
+        android:textSize="12sp" />
+
+      <Button
+        android:id="@+id/startGame2PlayerButton"
+        style="@style/button"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/button_background"
+        android:drawableTop="@drawable/outline_group_24"
+        android:text="@string/_2players"
+        android:textSize="12sp" />
+    </LinearLayout>
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/difficultyTextContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="50dp"
+    app:layout_constraintTop_toBottomOf="@id/playButtonsContainer">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="20dp"
+      android:text="@string/difficulty_column"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="18sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+      android:id="@+id/selectedDifficulty"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/easy"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="18sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/difficultyHelpButton"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+      android:id="@+id/difficultyHelpButton"
+      style="@style/icon_button"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_marginEnd="10dp"
+      android:contentDescription="@string/todo"
+      android:src="@drawable/baseline_help_outline_24"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/difficultyButtonsContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    app:layout_constraintTop_toBottomOf="@id/difficultyTextContainer">
+
+    <RadioGroup
+      android:id="@+id/difficultyButtonsGroup"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:orientation="horizontal"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent">
+
+      <RadioButton
+        android:id="@+id/easyDifficultyButton"
+        style="@style/button.green"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/button_background"
+        android:button="@null"
+        android:padding="5dp"
+        android:text="@string/easy"
+        android:textAlignment="center" />
+
+      <RadioButton
+        android:id="@+id/mediumDifficultyButton"
+        style="@style/button"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/button_background"
+        android:button="@null"
+        android:padding="5dp"
+        android:text="@string/medium"
+        android:textAlignment="center" />
+
+      <RadioButton
+        android:id="@+id/hardDifficultyButton"
+        style="@style/button.red"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/button_background"
+        android:button="@null"
+        android:padding="5dp"
+        android:text="@string/hard"
+        android:textAlignment="center" />
+    </RadioGroup>
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/topicHeaderContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    app:layout_constraintTop_toBottomOf="@id/difficultyButtonsContainer">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="20dp"
+      android:text="@string/topic_column"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="18sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+      android:id="@+id/topicHelpButton"
+      style="@style/icon_button"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_marginEnd="10dp"
+      android:contentDescription="@string/todo"
+      android:src="@drawable/baseline_help_outline_24"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <Spinner
+    android:id="@+id/topicSelector"
+    android:layout_width="match_parent"
+    android:layout_height="25dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginEnd="20dp"
+    android:background="@drawable/button_background"
+    android:contentDescription="@string/todo"
+    app:layout_constraintTop_toBottomOf="@id/topicHeaderContainer" />
 </androidx.constraintlayout.widget.ConstraintLayout>
