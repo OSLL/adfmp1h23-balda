@@ -17,11 +17,15 @@ import androidx.appcompat.widget.TooltipCompat
 import com.ifmo.balda.*
 
 class MainActivity : AppCompatActivity() {
-  private val buttonIdToDifficulty = mapOf(
-    Pair(R.id.easyDifficultyButton, Difficulty.EASY),
-    Pair(R.id.mediumDifficultyButton, Difficulty.MEDIUM),
-    Pair(R.id.hardDifficultyButton, Difficulty.HARD)
-  )
+  companion object {
+    private val buttonIdToDifficulty = mapOf(
+      Pair(R.id.easyDifficultyButton, Difficulty.EASY),
+      Pair(R.id.mediumDifficultyButton, Difficulty.MEDIUM),
+      Pair(R.id.hardDifficultyButton, Difficulty.HARD)
+    )
+
+    private val difficultyToButtonId = mapOf(*buttonIdToDifficulty.map { (fst, snd) -> Pair(snd, fst) }.toTypedArray())
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -47,9 +51,12 @@ class MainActivity : AppCompatActivity() {
     for (key in buttonIdToDifficulty.keys) {
       findViewById<RadioButton>(key).setOnCheckedChangeListener(difficultyChangeHandler)
     }
-    findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(R.id.easyDifficultyButton)
 
+    val defaultDifficulty = Difficulty.EASY // TODO: load from saved state
+    findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(difficultyToButtonId[defaultDifficulty]!!)
+    
     setOnClickTooltip(findViewById<ImageButton>(R.id.topicHelpButton), R.string.topic_help)
+
     findViewById<Spinner>(R.id.topicSelector).adapter = ArrayAdapter(
       this,
       android.R.layout.simple_list_item_1,
