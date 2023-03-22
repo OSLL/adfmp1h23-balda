@@ -1,6 +1,6 @@
 <resources>
   <!-- Base application theme. -->
-  <style name="Theme.Adfmp1h23balda" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+  <style name="Theme.Adfmp1h23balda" parent="Theme.MaterialComponents.Light.NoActionBar">
     <item name="backgroundColor">@color/blue</item>
     <item name="colorOnBackground">@color/yellow</item>
     <item name="colorPrimary">@color/yellow</item>
