@@ -1,7 +1,6 @@
 package com.ifmo.balda.activity
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -12,6 +11,7 @@ import androidx.core.app.NavUtils
 import com.ifmo.balda.GameMode
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.R
+import com.ifmo.balda.setOnClickActivity
 
 class ChooseNameActivity : AppCompatActivity() {
   @SuppressLint("CutPasteId")
@@ -27,8 +27,6 @@ class ChooseNameActivity : AppCompatActivity() {
       intent.getStringExtra(IntentExtraNames.GAME_MODE)
         ?: error("Missing required extra property ${IntentExtraNames.GAME_MODE}")
     )
-
-    val gameIntent = Intent(this, GameActivity::class.java)
 
     when (gameMode) {
       GameMode.SINGLE_PLAYER -> {
@@ -52,10 +50,9 @@ class ChooseNameActivity : AppCompatActivity() {
       }
     }
 
-    findViewById<Button>(R.id.playButton).setOnClickListener {
-      findViewById<EditText>(R.id.player1Name).text.let { gameIntent.putExtra(IntentExtraNames.PLAYER_1_NAME, it) }
-      findViewById<EditText>(R.id.player2Name).text?.let { gameIntent.putExtra(IntentExtraNames.PLAYER_2_NAME, it) }
-      startActivity(gameIntent)
-    }
+    findViewById<Button>(R.id.playButton).setOnClickActivity(this, GameActivity::class,
+      IntentExtraNames.PLAYER_1_NAME to findViewById<EditText>(R.id.player1Name).text?.toString(),
+      IntentExtraNames.PLAYER_2_NAME to findViewById<EditText>(R.id.player2Name).text?.toString()
+    )
   }
 }
