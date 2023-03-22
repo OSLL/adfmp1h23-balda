@@ -31,6 +31,7 @@ class BoardGridAdapter(
       view = (layoutInflater.inflate(R.layout.letter, null) as ToggleButton).apply {
         setLetterValue()
         isActivated = true
+        setOnClickListener(getOnLetterClickListener(position))
         setOnTouchListener(getOnLetterTouchListener(this, position))
       }
     }
@@ -41,6 +42,12 @@ class BoardGridAdapter(
     text = "A"
     textOn = "A"
     textOff = "A"
+  }
+
+  private fun getOnLetterClickListener(i: Int): View.OnClickListener {
+    return View.OnClickListener {
+      Log.d("click", "letter $i")
+    }
   }
 
   private fun getOnLetterTouchListener(letter: ToggleButton, i: Int): View.OnTouchListener {
