@@ -1,8 +1,10 @@
 package com.ifmo.balda.activity
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CompoundButton
@@ -12,6 +14,7 @@ import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.TooltipCompat
 import com.ifmo.balda.Difficulty
 import com.ifmo.balda.GameMode
 import com.ifmo.balda.IntentExtraNames
@@ -54,15 +57,25 @@ class MainActivity : AppCompatActivity() {
       startActivity(intent)
     }
 
+    setOnClickTooltip(findViewById<ImageButton>(R.id.difficultyHelpButton), R.string.difficulty_help)
     for (key in buttonIdToDifficulty.keys) {
       findViewById<RadioButton>(key).setOnCheckedChangeListener(difficultyChangeHandler)
     }
 
     findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(R.id.easyDifficultyButton)
+
+    setOnClickTooltip(findViewById<ImageButton>(R.id.difficultyHelpButton), R.string.topic_help)
     findViewById<Spinner>(R.id.topicSelector).adapter = ArrayAdapter(
       this,
       android.R.layout.simple_list_item_1,
-      listOf("Все", "Программирование", "Dota 2")
+      listOf("Общая", "Все", "Программирование", "Dota 2")
     )
+  }
+}
+
+private fun Context.setOnClickTooltip(view: View, tooltipTextId: Int) {
+  TooltipCompat.setTooltipText(view, getString(tooltipTextId))
+  view.setOnClickListener {
+    it.performLongClick()
   }
 }
