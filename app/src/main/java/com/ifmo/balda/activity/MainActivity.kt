@@ -1,8 +1,9 @@
 package com.ifmo.balda.activity
 
-import android.content.Intent
+import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CompoundButton
@@ -12,10 +13,8 @@ import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.ifmo.balda.Difficulty
-import com.ifmo.balda.GameMode
-import com.ifmo.balda.IntentExtraNames
-import com.ifmo.balda.R
+import androidx.appcompat.widget.TooltipCompat
+import com.ifmo.balda.*
 
 class MainActivity : AppCompatActivity() {
   private val buttonIdToDifficulty = mapOf(
@@ -36,33 +35,32 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
-    findViewById<ImageButton>(R.id.statButton).setOnClickListener {
-      startActivity(Intent(this, StatScreenActivity::class.java))
-    }
-    findViewById<ImageButton>(R.id.helpButton).setOnClickListener {
-      startActivity(Intent(this, HelpScreenActivity::class.java))
-    }
+    findViewById<ImageButton>(R.id.statButton).setOnClickActivity(this, StatScreenActivity::class)
+    findViewById<ImageButton>(R.id.helpButton).setOnClickActivity(this, HelpScreenActivity::class)
 
-    findViewById<Button>(R.id.startGame1PlayerButton).setOnClickListener {
-      val intent = Intent(this, ChooseNameActivity::class.java)
-        .putExtra(IntentExtraNames.GAME_MODE, GameMode.SINGLE_PLAYER.name)
-      startActivity(intent)
-    }
-    findViewById<Button>(R.id.startGame2PlayerButton).setOnClickListener {
-      val intent = Intent(this, ChooseNameActivity::class.java)
-        .putExtra(IntentExtraNames.GAME_MODE, GameMode.MULTIPLAYER.name)
-      startActivity(intent)
-    }
+    findViewById<Button>(R.id.startGame1PlayerButton).setOnClickActivity(this, ChooseNameActivity::class,
+      IntentExtraNames.GAME_MODE to GameMode.SINGLE_PLAYER.name)
+    findViewById<Button>(R.id.startGame2PlayerButton).setOnClickActivity(this, ChooseNameActivity::class,
+      IntentExtraNames.GAME_MODE to GameMode.MULTIPLAYER.name)
 
+    setOnClickTooltip(findViewById<ImageButton>(R.id.difficultyHelpButton), R.string.difficulty_help)
     for (key in buttonIdToDifficulty.keys) {
       findViewById<RadioButton>(key).setOnCheckedChangeListener(difficultyChangeHandler)
     }
-
     findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(R.id.easyDifficultyButton)
+
+    setOnClickTooltip(findViewById<ImageButton>(R.id.topicHelpButton), R.string.topic_help)
     findViewById<Spinner>(R.id.topicSelector).adapter = ArrayAdapter(
       this,
       android.R.layout.simple_list_item_1,
-      listOf("Все", "Программирование", "Dota 2")
+      listOf("Общая", "Все", "Программирование", "Dota 2")
     )
+  }
+}
+
+private fun Context.setOnClickTooltip(view: View, tooltipTextId: Int) {
+  TooltipCompat.setTooltipText(view, getString(tooltipTextId))
+  view.setOnClickListener {
+    it.performLongClick()
   }
 }
