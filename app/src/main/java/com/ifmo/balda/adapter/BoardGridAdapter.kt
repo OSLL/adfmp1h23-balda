@@ -90,6 +90,7 @@ class BoardGridAdapter(
               it.first.isActivated = false
             }
           } else {
+            Toast.makeText(v.context, "Слово ${getCurrentWord()} не загадывали", Toast.LENGTH_LONG).show()
             currentWord.forEach { it.first.performClick() }
             currentWord = linkedSetOf()
             return@OnTouchListener true
