@@ -77,7 +77,7 @@ class BoardGridAdapter(
           Log.d("up", "letter $i")
           val isValid = isCurrentWordValid()
           if (isValid) {
-            val color: Int = randomColor
+            val color = getRandomColor()
             currentWord.forEach {
               it.setBackgroundColor(color)
               it.isActivated = false
@@ -109,19 +109,18 @@ class BoardGridAdapter(
     return getCurrentWord() == "AAA"
   }
 
-  private val randomColor: Int
-    get() {
-      return Color.HSVToColor(
-        FloatArray(3) {
-          when (it) {
-            0 -> (0..360).random().toFloat()
-            1 -> (10..50).random().toFloat() / 100
-            2 -> (60..100).random().toFloat() / 100
-            else -> 0.0f
-          }
+  private fun getRandomColor(): Int {
+    return Color.HSVToColor(
+      FloatArray(3) {
+        when (it) {
+          0 -> (0..360).random().toFloat()
+          1 -> (10..50).random().toFloat() / 100
+          2 -> (60..100).random().toFloat() / 100
+          else -> 0.0f
         }
-      )
-    }
+      }
+    )
+  }
 
   class LetterButton : AppCompatToggleButton {
     var position by Delegates.notNull<Int>()
