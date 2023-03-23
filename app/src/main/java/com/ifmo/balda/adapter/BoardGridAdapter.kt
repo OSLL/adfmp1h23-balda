@@ -61,23 +61,23 @@ class BoardGridAdapter(
         MotionEvent.ACTION_MOVE -> {
           Log.d("move", "letter $i")
           Log.d("currWord", getCurrentWord())
+          currentWord.indexOfFirst { it.second == i }.takeIf { it != -1 }
+            ?.let { letterPos ->
+              repeat(currentWord.indices.last - letterPos) {
+                currentWord.last().first.performClick()
+                currentWord.remove(currentWord.last())
+              }
+              return@OnTouchListener true
+            }
           if (!letter.isActivated) {
-            currentWord.forEach { it.first.performClick() }
-            currentWord = linkedSetOf()
             return@OnTouchListener true
           }
           if (!isLetterValid(i)) {
             Log.d("move", "letter $i is not valid")
             return@OnTouchListener true
           }
-          if (currentWord.add(letter to i)) {
-            return@OnTouchListener v.performClick()
-          }
-          if (currentWord.last() != letter) {
-            currentWord.last().first.performClick()
-            currentWord.remove(currentWord.last())
-            return@OnTouchListener true
-          }
+          currentWord.add(letter to i)
+          return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_UP -> {
           Log.d("up", "letter $i")
