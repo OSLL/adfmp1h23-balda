@@ -21,15 +21,15 @@ class BoardGridAdapter(
 
   override fun getCount() = letters.size
 
-  override fun getItem(position: Int): Any? = null
+  override fun getItem(position: Int): String = letters[position]
 
-  override fun getItemId(position: Int): Long = 0
+  override fun getItemId(position: Int): Long = position.toLong()
 
   override fun getView(position: Int, grid: View?, parent: ViewGroup?): View {
     var view = grid
     if (view == null) {
       view = (layoutInflater.inflate(R.layout.letter, null) as ToggleButton).apply {
-        setLetterValue()
+        setLetterValue(position)
         isActivated = true
         setOnClickListener(getOnLetterClickListener(position))
         setOnTouchListener(getOnLetterTouchListener(this, position))
@@ -38,10 +38,11 @@ class BoardGridAdapter(
     return view
   }
 
-  private fun ToggleButton.setLetterValue() {
-    text = "A"
-    textOn = "A"
-    textOff = "A"
+  private fun ToggleButton.setLetterValue(position: Int) {
+    val letter = getItem(position)
+    text = letter
+    textOn = letter
+    textOff = letter
   }
 
   private fun getOnLetterClickListener(i: Int): View.OnClickListener {
