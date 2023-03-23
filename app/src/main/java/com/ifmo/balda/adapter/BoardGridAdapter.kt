@@ -14,7 +14,6 @@ import androidx.appcompat.widget.AppCompatToggleButton
 import com.ifmo.balda.R
 import kotlin.properties.Delegates
 
-
 class BoardGridAdapter(
   private val layoutInflater: LayoutInflater,
   private val letters: MutableList<String>,
@@ -98,10 +97,10 @@ class BoardGridAdapter(
   private fun isLetterValid(i: Int): Boolean {
     val lastPosition = currentWord.last().position
 
-    return i == lastPosition - 1
-      || i == lastPosition + 1
-      || i == lastPosition - n
-      || i == lastPosition + n
+    return i == lastPosition - 1 ||
+      i == lastPosition + 1 ||
+      i == lastPosition - n ||
+      i == lastPosition + n
   }
 
   private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.text }

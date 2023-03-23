@@ -50,7 +50,9 @@ class ChooseNameActivity : AppCompatActivity() {
       }
     }
 
-    findViewById<Button>(R.id.playButton).setOnClickActivity(this, GameActivity::class,
+    findViewById<Button>(R.id.playButton).setOnClickActivity(
+      this,
+      GameActivity::class,
       IntentExtraNames.PLAYER_1_NAME to findViewById<EditText>(R.id.player1Name).text?.toString(),
       IntentExtraNames.PLAYER_2_NAME to findViewById<EditText>(R.id.player2Name).text?.toString()
     )
