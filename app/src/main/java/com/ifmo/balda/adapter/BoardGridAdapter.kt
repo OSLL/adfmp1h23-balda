@@ -1,6 +1,8 @@
 package com.ifmo.balda.adapter
 
+import android.content.Context
 import android.graphics.Color
+import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -8,8 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Toast
-import android.widget.ToggleButton
+import androidx.appcompat.widget.AppCompatToggleButton
 import com.ifmo.balda.R
+import kotlin.properties.Delegates
 
 
 class BoardGridAdapter(
@@ -18,7 +21,7 @@ class BoardGridAdapter(
   private val n: Int
 ) : BaseAdapter() {
 
-  private var currentWord = linkedSetOf<Pair<ToggleButton, Int>>()
+  private var currentWord = linkedSetOf<LetterButton>()
 
   override fun getCount() = letters.size
 
@@ -27,23 +30,12 @@ class BoardGridAdapter(
   override fun getItemId(position: Int): Long = position.toLong()
 
   override fun getView(position: Int, grid: View?, parent: ViewGroup?): View {
-    var view = grid
-    if (view == null) {
-      view = (layoutInflater.inflate(R.layout.letter, null) as ToggleButton).apply {
-        setLetterValue(position)
-        isActivated = true
-        setOnClickListener(getOnLetterClickListener(position))
-        setOnTouchListener(getOnLetterTouchListener(this, position))
-      }
+    return grid ?: (layoutInflater.inflate(R.layout.letter, null) as LetterButton).apply {
+      this.position = position
+      setLetterValue(getItem(position))
+      setOnClickListener(getOnLetterClickListener(position))
+      setOnTouchListener(getOnLetterTouchListener(this, position))
     }
-    return view
-  }
-
-  private fun ToggleButton.setLetterValue(position: Int) {
-    val letter = getItem(position)
-    text = letter
-    textOn = letter
-    textOff = letter
   }
 
   private fun getOnLetterClickListener(i: Int): View.OnClickListener {
@@ -52,21 +44,21 @@ class BoardGridAdapter(
     }
   }
 
-  private fun getOnLetterTouchListener(letter: ToggleButton, i: Int): View.OnTouchListener {
+  private fun getOnLetterTouchListener(letter: LetterButton, i: Int): View.OnTouchListener {
     return View.OnTouchListener { v, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           Log.d("touch", "letter $i")
-          currentWord = linkedSetOf(letter to i)
+          currentWord = linkedSetOf(letter)
           return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_MOVE -> {
           Log.d("move", "letter $i")
           Log.d("currWord", getCurrentWord())
-          currentWord.indexOfFirst { it.second == i }.takeIf { it != -1 }
+          currentWord.indexOfFirst { it.position == i }.takeIf { it != -1 }
             ?.let { letterPos ->
               repeat(currentWord.indices.last - letterPos) {
-                currentWord.last().first.performClick()
+                currentWord.last().performClick()
                 currentWord.remove(currentWord.last())
               }
               return@OnTouchListener true
@@ -78,7 +70,7 @@ class BoardGridAdapter(
             Log.d("move", "letter $i is not valid")
             return@OnTouchListener true
           }
-          currentWord.add(letter to i)
+          currentWord.add(letter)
           return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_UP -> {
@@ -87,12 +79,12 @@ class BoardGridAdapter(
           if (isValid) {
             val color: Int = randomColor
             currentWord.forEach {
-              it.first.setBackgroundColor(color)
-              it.first.isActivated = false
+              it.setBackgroundColor(color)
+              it.isActivated = false
             }
           } else {
             Toast.makeText(v.context, "Слово ${getCurrentWord()} не загадывали", Toast.LENGTH_LONG).show()
-            currentWord.forEach { it.first.performClick() }
+            currentWord.forEach { it.performClick() }
             currentWord = linkedSetOf()
             return@OnTouchListener true
           }
@@ -103,7 +95,7 @@ class BoardGridAdapter(
   }
 
   private fun isLetterValid(i: Int): Boolean {
-    val lastPosition = currentWord.last().second
+    val lastPosition = currentWord.last().position
 
     return i == lastPosition - 1
       || i == lastPosition + 1
@@ -111,7 +103,7 @@ class BoardGridAdapter(
       || i == lastPosition + n
   }
 
-  private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.first.text }
+  private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.text }
 
   private fun isCurrentWordValid(): Boolean {
     return getCurrentWord() == "AAA"
@@ -130,4 +122,22 @@ class BoardGridAdapter(
         }
       )
     }
+
+  class LetterButton : AppCompatToggleButton {
+    var position by Delegates.notNull<Int>()
+
+    init {
+      isActivated = true
+    }
+
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    fun setLetterValue(value: String) {
+      text = value
+      textOn = value
+      textOff = value
+    }
+  }
 }
