@@ -22,17 +22,7 @@
     <item name="android:insetBottom">0dp</item>
   </style>
 
-  <style name="letter_background">
-    <item name="android:layout_width">wrap_content</item>
-    <item name="android:layout_height">wrap_content</item>
-
-    <item name="android:gravity">center_horizontal</item>
-  </style>
-
   <style name="letter">
-    <item name="android:layout_width">40dp</item>
-    <item name="android:layout_height">40dp</item>
-
     <item name="android:textColor">?attr/colorOnPrimary</item>
   </style>
 </resources>
