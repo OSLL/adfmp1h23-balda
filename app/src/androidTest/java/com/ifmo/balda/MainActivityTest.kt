@@ -12,7 +12,6 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import com.ifmo.balda.activity.HelpScreenActivity
 import com.ifmo.balda.activity.MainActivity
 import com.ifmo.balda.activity.StatScreenActivity
@@ -33,6 +32,7 @@ class MainActivityTest {
       Intents.init()
     }
   }
+
   @Test
   fun testStatsButton() {
     onView(withId(R.id.statButton))
@@ -61,11 +61,12 @@ class MainActivityTest {
     }
   }
 
+  @Test
   fun testTopicSelector() {
     onView(withId(R.id.topicSelector))
       .check(matches(isDisplayed()))
       .check(matches(isClickable()))
-      // TODO: probably find a way to check content
+    // TODO: probably find a way to check content
   }
 
   @Test
@@ -83,5 +84,24 @@ class MainActivityTest {
         .perform(click())
       onView(withId(R.id.selectedDifficulty)).check(matches(withText(resourceId)))
     }
+  }
+
+  @Test
+  fun testDifficultyTooltip() {
+    onView(withId(R.id.difficultyHelpButton))
+      .check(matches(isDisplayed()))
+      .check(matches(isClickable()))
+      .check(matches(withTooltip(R.string.difficulty_help)))
+      .perform(click())
+    // TODO: can we check that tooltip is actually shown
+  }
+
+  @Test
+  fun testTopicTooltip() {
+    onView(withId(R.id.topicHelpButton))
+      .check(matches(isDisplayed()))
+      .check(matches(isClickable()))
+      .check(matches(withTooltip(R.string.topic_help)))
+      .perform(click())
   }
 }
