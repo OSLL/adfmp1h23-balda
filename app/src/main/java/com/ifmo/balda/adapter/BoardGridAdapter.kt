@@ -15,7 +15,8 @@ import com.ifmo.balda.R
 class BoardGridAdapter(
   private val layoutInflater: LayoutInflater,
   private val letters: MutableList<String>,
-  private val n: Int
+  private val n: Int,
+  private val wordPositions: List<List<Pair<Int, Int>>>
 ) : BaseAdapter() {
 
   private var currentWord = linkedSetOf<Pair<ToggleButton, Int>>()
@@ -114,7 +115,7 @@ class BoardGridAdapter(
   private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.first.text }
 
   private fun isCurrentWordValid(): Boolean {
-    return getCurrentWord() == "AAA"
+    return currentWord.map { (it.second / n) to (it.second % n) } in wordPositions
   }
 
   private val randomColor: Int

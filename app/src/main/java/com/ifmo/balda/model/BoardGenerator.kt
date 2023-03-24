@@ -1,0 +1,64 @@
+package com.ifmo.balda.model
+
+import com.ifmo.balda.model.Board.Companion.DOWN
+import com.ifmo.balda.model.Board.Companion.LEFT
+import com.ifmo.balda.model.Board.Companion.RIGHT
+import com.ifmo.balda.model.Board.Companion.UP
+import com.ifmo.balda.model.Board.Companion.oppositeDirection
+import com.ifmo.balda.unreachable
+import kotlin.random.Random
+
+class BoardGenerator(private val random: Random) {
+  fun generate(): Board {
+    val board = Board()
+
+    while (board.countClusters() > 1) {
+      merging@ for ((i, j) in board.cells.flatMapIndexed { i, row -> row.indices.map { i to it } }.shuffled(random)) {
+        val cell = board.cells[i][j]
+
+        for (dir in listOf(UP, LEFT, DOWN, RIGHT).shuffled(random)) {
+          if (!cell.connection[dir]) {
+            continue
+          }
+          val nextCell = board[board.neighbor(i to j, dir) ?: continue]
+
+          val neighborDirs = when (dir) {
+            UP, DOWN -> listOf(LEFT, RIGHT)
+            LEFT, RIGHT -> listOf(UP, DOWN)
+            else -> unreachable()
+          }
+
+          for (neighDir in neighborDirs.shuffled(random)) {
+            val neighCell = board[board.neighbor(i to j, neighDir) ?: continue]
+            if (!neighCell.connection[dir]) {
+              continue
+            }
+            val cluster = board.getCluster(i to j)
+            if (board.neighbor(i to j, neighDir) in cluster || board.neighbor(i to j, dir, neighDir) in cluster) {
+              continue
+            }
+
+            val nextNeighCell = board[board.neighbor(i to j, dir, neighDir)!!]
+
+            cell.connection[dir] = false
+            nextCell.connection[dir.oppositeDirection] = false
+            neighCell.connection[dir] = false
+            nextNeighCell.connection[dir.oppositeDirection] = false
+
+            cell.connection[neighDir] = true
+            nextCell.connection[neighDir] = true
+            neighCell.connection[neighDir.oppositeDirection] = true
+            nextNeighCell.connection[neighDir.oppositeDirection] = true
+
+            assert(board.connectionsValid())
+
+            break@merging
+          }
+        }
+      }
+    }
+
+
+    return board
+  }
+}
