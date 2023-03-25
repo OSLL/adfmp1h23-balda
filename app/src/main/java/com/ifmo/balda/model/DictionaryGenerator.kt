@@ -11,6 +11,9 @@ class DictionaryGenerator(private val random: Random) {
       if (diff < wordBase.keys.min()) {
         val maxLength = words.keys.max()
         words[maxLength]!!.remove(words[maxLength]!!.first())
+        if (words[maxLength]!!.isEmpty()) {
+          words -= maxLength
+        }
       }
       val nextWord = wordBase.filterKeys { it <= diff }.flatMap { it.value }.randomOrNull(random) ?: continue
       words.getOrPut(nextWord.length) { mutableSetOf() } += nextWord
