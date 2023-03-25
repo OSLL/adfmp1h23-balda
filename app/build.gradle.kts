@@ -9,10 +9,6 @@ android {
     getByName("main").resources {
       srcDir(file("src/main/res"))
     }
-    getByName("test").resources {
-      srcDir(file("src/test/res"))
-      srcDir(file("src/main/res"))
-    }
   }
 
   namespace = "com.ifmo.balda"
