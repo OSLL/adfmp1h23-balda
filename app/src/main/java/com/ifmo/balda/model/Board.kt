@@ -2,6 +2,27 @@ package com.ifmo.balda.model
 
 import com.ifmo.balda.unreachable
 
+/**
+ * A square grid of cells.
+ * Each cell may be connected to its direct neighbors.
+ *
+ * In graph theory terms, each cell represents a vertex,
+ * and if two cells are connected to each other,
+ * it means that there is an edge between them.
+ *
+ * The Board class is used for the creation of trajectories (paths of edges)
+ * that the words will be aligned to in the game's grid.
+ *
+ * The Board is initialized with 2x2 squares of connected cells, like this:
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ */
 class Board {
   class Cell(val connection: BooleanArray = BooleanArray(4))
 
@@ -47,6 +68,9 @@ class Board {
     return cells.getOrNull(ij.first)?.getOrNull(ij.second)
   }
 
+  /**
+   * Goes through the path specified by the [directions], returns the cell it ends up with.
+   */
   fun neighbor(cell: Pair<Int, Int>, vararg directions: Int): Pair<Int, Int>? {
     @Suppress("NAME_SHADOWING")
     var cell: Pair<Int, Int>? = cell
@@ -95,6 +119,11 @@ class Board {
     }
   }
 
+  /**
+   * Ensures that for each cell with the `connection` flag set to `true` in some direction,
+   * there is a corresponding neighbor cell with the `connection` flag set to `true` in the opposite direction.
+   * This basically means that we don't have any unmatched, "hanging" connections.
+   */
   fun connectionsValid(): Boolean {
     for ((i, row) in cells.withIndex()) {
       for ((j, cell) in row.withIndex()) {
@@ -123,6 +152,10 @@ class Board {
     return true
   }
 
+  /**
+   * Returns the number of unique clusters, that may be returned by the [getCluster] function.
+   * The order of the cells in a cluster doesn't matter here, so a cluster is basically a connectivity component.
+   */
   fun countClusters(): Int {
     require(connectionsValid())
 
@@ -142,6 +175,23 @@ class Board {
     return clusters
   }
 
+  /**
+   * Traverses the board starting at the given cell.
+   * Returns all reachable cells in the order they were visited.
+   * Since some cells may have more than 2 connections, paths may fork.
+   * It's difficult to explain the result in words, so I'll proceed with an example.
+   * Imagine this board (all adjacent cells with letters are connected):
+   *
+   *    A B C D E F • • t h e s e • c l u s t e r s • a r e • u n r e a c h a b l e
+   *    • • K • G • • • • • • • • • • • • • • • • • • • • • • • • • • • • • • • • •
+   *    • • J I H • • • • • • • • • • • • • • • • • • • • • • • • • • • • • • • • •
+   *
+   *  Starting at the letter A, this function may return any of the following (extra spaces are solely for readability):
+   *    - A B C D E F   K J I H G
+   *    - A B C D E G H I J K   F
+   *    - A B C K J I H G E D   F
+   *    - A B C K J I H G E F   D
+   */
   fun getCluster(cell: Pair<Int, Int>): LinkedHashSet<Pair<Int, Int>> {
     require(connectionsValid())
     return doGetCluster(cell)
