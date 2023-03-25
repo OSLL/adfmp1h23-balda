@@ -3,10 +3,12 @@ package com.ifmo.balda.model
 import kotlin.random.Random
 
 class DictionaryGenerator(private val random: Random) {
-  fun generate(totalLength: Int, wordBase: Map<Int, List<String>>): Set<String> {
+  fun generate(totalLength: Int, wordBase: Map<Int, List<String>>, minWords: Int = 8): Set<String> {
     val words = mutableMapOf<Int, MutableSet<String>>()
 
-    while (words.values.sumOf { it.sumOf { it.length } } < totalLength) {
+    while (words.values.sumOf { it.sumOf { it.length } } < totalLength
+      || words.values.flatten().toSet().size < minWords
+    ) {
       val diff = totalLength - words.values.sumOf { it.sumOf { it.length } }
       if (diff < wordBase.keys.min()) {
         val maxLength = words.keys.max()
