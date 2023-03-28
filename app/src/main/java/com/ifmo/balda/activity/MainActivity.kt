@@ -49,12 +49,12 @@ class MainActivity : AppCompatActivity() {
     findViewById<Button>(R.id.startGame1PlayerButton).setOnClickActivity(
       this,
       ChooseNameActivity::class,
-      IntentExtraNames.GAME_MODE to GameMode.SINGLE_PLAYER.name
+      IntentExtraNames.GAME_MODE to { GameMode.SINGLE_PLAYER.name }
     )
     findViewById<Button>(R.id.startGame2PlayerButton).setOnClickActivity(
       this,
       ChooseNameActivity::class,
-      IntentExtraNames.GAME_MODE to GameMode.MULTIPLAYER.name
+      IntentExtraNames.GAME_MODE to { GameMode.MULTIPLAYER.name }
     )
 
     setOnClickTooltip(findViewById<ImageButton>(R.id.difficultyHelpButton), R.string.difficulty_help)

@@ -6,11 +6,15 @@ import android.content.Intent
 import android.view.View
 import kotlin.reflect.KClass
 
-fun View.setOnClickActivity(context: Context, activity: KClass<out Activity>, vararg extras: Pair<String, String?>) {
+fun View.setOnClickActivity(
+  context: Context,
+  activity: KClass<out Activity>,
+  vararg extraSuppliers: Pair<String, () -> String?>
+) {
   setOnClickListener {
     val intent = Intent(context, activity.java)
-    for ((key, value) in extras) {
-      intent.putExtra(key, value)
+    for ((key, valueSupplier) in extraSuppliers) {
+      intent.putExtra(key, valueSupplier())
     }
     context.startActivity(intent)
   }
