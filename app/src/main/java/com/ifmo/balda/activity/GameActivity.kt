@@ -25,7 +25,7 @@ class GameActivity : AppCompatActivity() {
     Log.d("board", "seed is $seed")
     val random = Random(seed)
 
-    val board = BoardGenerator(random).generate()
+    val board = BoardGenerator(random).generate(n, n)
     val trajectory = board.getCluster(0 to 0)
 
     val dict = DictionaryGenerator(random).generate(trajectory.size, WordBase.nouns).shuffled(random)

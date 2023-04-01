@@ -37,8 +37,8 @@ class BoardGenerator(private val random: Random) {
    *   the actual precondition for cycle merging is that they both have at least two adjacent cells,
    *   that are neighbors to the cells of the other cycle.
    */
-  fun generate(): Board {
-    val board = Board()
+  fun generate(height: Int, width: Int): Board {
+    val board = Board(height, width)
 
     while (board.countClusters() > 1) {
       merging@ for ((i, j) in board.cells.flatMapIndexed { i, row -> row.indices.map { i to it } }.shuffled(random)) {

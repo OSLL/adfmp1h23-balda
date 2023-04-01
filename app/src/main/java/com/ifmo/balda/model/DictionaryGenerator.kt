@@ -10,6 +10,8 @@ class DictionaryGenerator(private val random: Random) {
    * but in practice it does, if the [wordBase] satisfies the above condition.
    */
   fun generate(totalLength: Int, wordBase: Map<Int, List<String>>, minWords: Int = 8): Set<String> {
+    require(minWords * wordBase.keys.min() <= totalLength)
+
     val words = mutableMapOf<Int, MutableSet<String>>()
 
     while (words.values.sumOf { it.sumOf { it.length } } < totalLength

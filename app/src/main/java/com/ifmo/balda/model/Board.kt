@@ -3,7 +3,7 @@ package com.ifmo.balda.model
 import com.ifmo.balda.unreachable
 
 /**
- * A square grid of cells.
+ * A grid of cells. Height and width cannot be both odd at the same time.
  * Each cell may be connected to its direct neighbors.
  *
  * In graph theory terms, each cell represents a vertex,
@@ -22,8 +22,27 @@ import com.ifmo.balda.unreachable
  *    └┘└┘└┘└┘
  *    ┌┐┌┐┌┐┌┐
  *    └┘└┘└┘└┘
+ *  or, if the width is odd, like this:
+ *    ┌┐┌┐┌┐┌─┐
+ *    └┘└┘└┘└─┘
+ *    ┌┐┌┐┌┐┌─┐
+ *    └┘└┘└┘└─┘
+ *    ┌┐┌┐┌┐┌─┐
+ *    └┘└┘└┘└─┘
+ *    ┌┐┌┐┌┐┌─┐
+ *    └┘└┘└┘└─┘
+ *  or, if the height is odd, like this:
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ *    ┌┐┌┐┌┐┌┐
+ *    └┘└┘└┘└┘
+ *    ┌┐┌┐┌┐┌┐
+ *    ││││││││
+ *    └┘└┘└┘└┘
  */
-class Board {
+class Board(height: Int, width: Int) {
   class Cell(val connection: BooleanArray = BooleanArray(4))
 
   companion object {
@@ -46,8 +65,24 @@ class Board {
       }
   }
 
-  val cells = Array(8) { i -> Array(8) { j ->
-    when ((i % 2) to (j % 2)) {
+  val cells = Array(height) { i -> Array(width) { j ->
+    if (width % 2 == 1 && j == width - 2) {
+      cell(LEFT, RIGHT)
+    } else if (width % 2 == 1 && j == width - 1) {
+      if (i % 2 == 0) {
+        cell(DOWN, LEFT)
+      } else {
+        cell(UP, LEFT)
+      }
+    } else if (height % 2 == 1 && i == height - 2) {
+      cell(DOWN, UP)
+    } else if (height % 2 == 1 && i == height - 1) {
+      if (j % 2 == 0) {
+        cell(UP, RIGHT)
+      } else {
+        cell(UP, LEFT)
+      }
+    } else when ((i % 2) to (j % 2)) {
       0 to 0 -> cell(DOWN, RIGHT)
       0 to 1 -> cell(DOWN, LEFT)
       1 to 0 -> cell(UP, RIGHT)
@@ -57,6 +92,8 @@ class Board {
   } }
 
   init {
+    require(height > 0 && width > 0)
+    require(!(height % 2 == 1 && width % 2 == 1))
     assert(connectionsValid())
   }
 
