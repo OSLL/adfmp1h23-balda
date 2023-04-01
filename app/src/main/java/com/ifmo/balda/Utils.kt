@@ -6,7 +6,6 @@ import android.content.Intent
 import android.view.View
 import kotlin.reflect.KClass
 
-
 fun View.setOnClickActivity(context: Context, activity: KClass<out Activity>, vararg extras: Pair<String, String?>) {
   setOnClickListener {
     val intent = Intent(context, activity.java)
@@ -16,3 +15,5 @@ fun View.setOnClickActivity(context: Context, activity: KClass<out Activity>, va
     context.startActivity(intent)
   }
 }
+
+fun unreachable(): Nothing = error("unreachable")

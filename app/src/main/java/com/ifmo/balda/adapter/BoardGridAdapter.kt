@@ -18,7 +18,8 @@ import kotlin.properties.Delegates
 class BoardGridAdapter(
   private val layoutInflater: LayoutInflater,
   private val letters: MutableList<String>,
-  private val n: Int
+  private val n: Int,
+  private val wordPositions: List<List<Pair<Int, Int>>>
 ) : BaseAdapter() {
 
   private var currentWord = linkedSetOf<LetterButton>()
@@ -106,7 +107,7 @@ class BoardGridAdapter(
   private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.text }
 
   private fun isCurrentWordValid(): Boolean {
-    return getCurrentWord() == "AAA"
+    return currentWord.map { (it.position / n) to (it.position % n) } in wordPositions
   }
 
   private fun getRandomColor(): Int {

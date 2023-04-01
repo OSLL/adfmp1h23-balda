@@ -5,6 +5,12 @@ plugins {
 }
 
 android {
+  sourceSets {
+    getByName("main").resources {
+      srcDir(file("src/main/res"))
+    }
+  }
+
   namespace = "com.ifmo.balda"
   compileSdk = 33
 
