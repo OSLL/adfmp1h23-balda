@@ -115,7 +115,7 @@ class BoardGridAdapter(
   private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.first.text }
 
   private fun isCurrentWordValid(): Boolean {
-    return currentWord.map { (it.second / n) to (it.second % n) } in wordPositions
+    return currentWord.map { (it.position / n) to (it.position % n) } in wordPositions
   }
 
   private val randomColor: Int
