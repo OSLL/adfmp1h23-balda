@@ -8,9 +8,9 @@ import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
-import com.ifmo.balda.GameMode
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.R
+import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.setOnClickActivity
 
 class ChooseNameActivity : AppCompatActivity() {
