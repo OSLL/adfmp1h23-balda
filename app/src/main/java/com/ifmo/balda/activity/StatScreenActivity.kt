@@ -27,7 +27,6 @@ class StatScreenActivity : AppCompatActivity() {
       }
     }
 
-
     findViewById<ImageButton>(R.id.backButton).setOnClickListener {
       NavUtils.navigateUpFromSameTask(this)
     }
