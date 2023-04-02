@@ -49,7 +49,6 @@ dependencies {
   implementation("com.google.android.material:material:1.8.0")
   implementation("androidx.constraintlayout:constraintlayout:2.1.4")
   implementation("androidx.room:room-runtime:$roomVersion")
-  annotationProcessor("androidx.room:room-compiler:$roomVersion")
   ksp("androidx.room:room-compiler:$roomVersion")
   implementation("androidx.room:room-ktx:$roomVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")

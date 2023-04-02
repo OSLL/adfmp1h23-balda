@@ -12,7 +12,7 @@ import com.ifmo.balda.model.entity.Stat
 import com.ifmo.balda.model.entity.Word
 import kotlin.streams.asSequence
 
-@Database(entities = [Word::class, Stat::class], version = 1)
+@Database(entities = [Word::class, Stat::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
   abstract fun wordDao(): WordDao
   abstract fun statDao(): StatDao
