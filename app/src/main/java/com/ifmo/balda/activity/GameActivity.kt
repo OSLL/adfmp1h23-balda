@@ -68,7 +68,7 @@ class GameActivity : AppCompatActivity() {
     val board = BoardGenerator(random).generate(n, n)
     val trajectory = board.getCluster(0 to 0)
 
-    val len2words = runBlocking { db.wordDao().getWordsByLength(Topic.COMMON.name) }
+    val len2words = runBlocking { db.wordDao().getLength2WordsByTopic(Topic.COMMON) }
     val dict = DictionaryGenerator(random).generate(trajectory.size, len2words).shuffled(random)
     Log.d("board", "dict is ${dict.toList()}")
 
