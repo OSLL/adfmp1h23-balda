@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.MapInfo
 import androidx.room.Query
 import com.ifmo.balda.model.Topic
-import kotlin.random.Random
 
 @Dao
 abstract class WordDao {

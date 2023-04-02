@@ -51,9 +51,9 @@ class MainActivity : AppCompatActivity() {
       IntentExtraNames.GAME_MODE to { GameMode.MULTIPLAYER.name }
     )
 
-    getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).also {
-      initDifficultyBlock(it)
-      initTopicBlock(it)
+    with(getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)) {
+      initDifficultyBlock(this)
+      initTopicBlock(this)
     }
   }
 

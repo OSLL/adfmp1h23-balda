@@ -39,9 +39,9 @@ class GameActivity : AppCompatActivity() {
     findViewById<TextView>(R.id.p2_score).text = "0"
 
     // TODO: move this out of main thread
-    getBoard().also {
-      fillBoardWithLetters(it)
-      setUpBoardGrid(it)
+    with(getBoard()) {
+      fillBoardWithLetters(this)
+      setUpBoardGrid(this)
     }
   }
 
