@@ -1,6 +1,7 @@
 package com.ifmo.balda.activity
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
@@ -50,11 +51,13 @@ class MainActivity : AppCompatActivity() {
       IntentExtraNames.GAME_MODE to { GameMode.MULTIPLAYER.name }
     )
 
-    initDifficultyBlock()
-    initTopicBlock()
+    getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).also {
+      initDifficultyBlock(it)
+      initTopicBlock(it)
+    }
   }
 
-  private fun initTopicBlock() {
+  private fun initTopicBlock(prefs: SharedPreferences) {
     val selector = findViewById<Spinner>(R.id.topicSelector)
     val values = Topic.values()
 
@@ -63,18 +66,17 @@ class MainActivity : AppCompatActivity() {
       this,
       android.R.layout.simple_list_item_1,
       values.map {
-        val rId = it.toResourceId()
+        val rId = it.resourceId
         val text = resources.getString(rId)
         TopicSelectorItem(rId, text)
       }
     )
 
-    val savedTopic = Topic.valueOf(getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
-      .getString(PreferencesKeys.topicKey, Topic.ALL.name)!!)
-    selector.setSelection(values.indexOfFirst { it.toResourceId() == savedTopic.toResourceId()})
+    val savedTopic = Topic.valueOf(prefs.getString(PreferencesKeys.topicKey, Topic.ALL.name)!!)
+    selector.setSelection(values.indexOfFirst { it.resourceId == savedTopic.resourceId })
   }
 
-  private fun initDifficultyBlock() {
+  private fun initDifficultyBlock(prefs: SharedPreferences) {
     val difficultyChangeHandler = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
       buttonView.typeface = if (isChecked) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
 
@@ -89,12 +91,7 @@ class MainActivity : AppCompatActivity() {
       findViewById<RadioButton>(key).setOnCheckedChangeListener(difficultyChangeHandler)
     }
 
-    val selectedDifficulty = Difficulty.valueOf(
-      getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).getString(
-        PreferencesKeys.difficultyKey,
-        Difficulty.EASY.name
-      )!!
-    )
+    val selectedDifficulty = Difficulty.valueOf(prefs.getString(PreferencesKeys.difficultyKey, Difficulty.EASY.name)!!)
     findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(difficultyToButtonId[selectedDifficulty]!!)
   }
 
@@ -111,7 +108,6 @@ class MainActivity : AppCompatActivity() {
       putString(PreferencesKeys.topicKey, selectedTopic.name)
       apply()
     }
-
   }
 }
 

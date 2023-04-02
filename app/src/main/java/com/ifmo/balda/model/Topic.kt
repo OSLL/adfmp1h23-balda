@@ -1,6 +1,5 @@
 package com.ifmo.balda.model
 
-import android.content.Context
 import com.ifmo.balda.R
 
 enum class Topic { // TODO: find a way to check that this list matches with resources
@@ -9,12 +8,13 @@ enum class Topic { // TODO: find a way to check that this list matches with reso
   DOTA_2,
   ALL;
 
-  fun toResourceId(): Int = when (this) {
-    COMMON -> R.string.topic_common
-    PROGRAMMING -> R.string.topic_programming
-    DOTA_2 -> R.string.topic_dota2
-    ALL -> R.string.topic_all
-  }
+  val resourceId
+    get(): Int = when (this) {
+      COMMON -> R.string.topic_common
+      PROGRAMMING -> R.string.topic_programming
+      DOTA_2 -> R.string.topic_dota2
+      ALL -> R.string.topic_all
+    }
 
   companion object {
     fun fromResourceId(id: Int): Result<Topic> = when (id) {

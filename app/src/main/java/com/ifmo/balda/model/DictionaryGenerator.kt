@@ -14,8 +14,8 @@ class DictionaryGenerator(private val random: Random) {
 
     val words = mutableMapOf<Int, MutableSet<String>>()
 
-    while (words.values.sumOf { it.sumOf { it.length } } < totalLength
-      || words.values.flatten().toSet().size < minWords
+    while (words.values.sumOf { it.sumOf { it.length } } < totalLength ||
+      words.values.flatten().toSet().size < minWords
     ) {
       val diff = totalLength - words.values.sumOf { it.sumOf { it.length } }
       if (diff < wordBase.keys.min()) {

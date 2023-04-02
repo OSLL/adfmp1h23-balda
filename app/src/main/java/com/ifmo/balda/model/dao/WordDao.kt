@@ -1,17 +1,12 @@
 package com.ifmo.balda.model.dao
 
 import androidx.room.Dao
+import androidx.room.MapInfo
 import androidx.room.Query
 
 @Dao
 interface WordDao {
-  @Query("select word from word")
-  suspend fun getAll(): List<WordSlice>
-
-  @Query("select word from word where topic = :topicName")
-  suspend fun getByTopic(topicName: String): List<WordSlice>
+  @MapInfo(keyColumn = "len", valueColumn = "word")
+  @Query("select length(word) as len, word from word where topic = :topicName")
+  suspend fun getWordsByLength(topicName: String): Map<Int, List<String>>
 }
-
-data class WordSlice(
-  val word: String
-)

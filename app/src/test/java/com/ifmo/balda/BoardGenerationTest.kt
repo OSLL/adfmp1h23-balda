@@ -42,7 +42,6 @@ class BoardGenerationTest {
     }
   }
 
-
   private fun test_continuity(board: Board) {
     val cluster = board.getCluster(0 to 0)
     val height = board.cells.size
