@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.selectedDifficulty).text = buttonView.text
       }
     }
-    
+
     setOnClickTooltip(findViewById<ImageButton>(R.id.difficultyHelpButton), R.string.difficulty_help)
 
     for (key in buttonIdToDifficulty.keys) {

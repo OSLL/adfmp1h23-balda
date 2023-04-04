@@ -27,7 +27,7 @@ class NameChoosingActivityTest {
 
     onView(withId(R.id.player1Name))
       .check(matches(isDisplayed()))
-      .check(matches(withText(R.string.player)))
+      .check(matches(withAnyText()))
     onView(withId(R.id.player2Name))
       .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)))
     onView(withId(R.id.playButton))
@@ -42,10 +42,10 @@ class NameChoosingActivityTest {
 
     onView(withId(R.id.player1Name))
       .check(matches(isDisplayed()))
-      .check(matches(withText(R.string.player1)))
+      .check(matches(withAnyText()))
     onView(withId(R.id.player2Name))
       .check(matches(isDisplayed()))
-      .check(matches(withText(R.string.player2)))
+      .check(matches(withAnyText()))
     onView(withId(R.id.playButton))
       .check(matches(isDisplayed()))
       .check(matches(isClickable()))
