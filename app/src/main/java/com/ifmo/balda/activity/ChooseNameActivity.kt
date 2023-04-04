@@ -50,9 +50,16 @@ class ChooseNameActivity : AppCompatActivity() {
       }
     }
 
-    findViewById<Button>(R.id.playButton).setOnClickActivity(this, GameActivity::class,
-      IntentExtraNames.PLAYER_1_NAME to findViewById<EditText>(R.id.player1Name).text?.toString(),
-      IntentExtraNames.PLAYER_2_NAME to findViewById<EditText>(R.id.player2Name).text?.toString()
+    findViewById<Button>(R.id.playButton).setOnClickActivity(
+      this,
+      GameActivity::class,
+      IntentExtraNames.PLAYER_1_NAME to { findViewById<EditText>(R.id.player1Name).text.toString() },
+      IntentExtraNames.PLAYER_2_NAME to {
+        when (gameMode) {
+          GameMode.SINGLE_PLAYER -> resources.getString(R.string.bot)
+          GameMode.MULTIPLAYER -> findViewById<EditText>(R.id.player2Name).text.toString()
+        }
+      }
     )
   }
 }

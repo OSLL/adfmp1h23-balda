@@ -32,4 +32,11 @@
   <string name="menu">В меню</string>
   <string name="pass">Пропуск</string>
   <string name="tip">Помощь</string>
+  <string name="bot">Bot</string>
+  <string-array name="topics">
+    <item>Общая</item>
+    <item>Все</item>
+    <item>Программирование</item>
+    <item>Dota 2</item>
+  </string-array>
 </resources>

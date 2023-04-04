@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
+import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.R
 import com.ifmo.balda.adapter.BoardGridAdapter
 import com.ifmo.balda.model.BoardGenerator
@@ -54,6 +56,11 @@ class GameActivity : AppCompatActivity() {
     findViewById<Button>(R.id.menu_button).setOnClickListener {
       NavUtils.navigateUpTo(this, Intent(this, MainActivity::class.java))
     }
+
+    findViewById<TextView>(R.id.p1_name).text = this.intent.extras!!.getString(IntentExtraNames.PLAYER_1_NAME)!!
+    findViewById<TextView>(R.id.p2_name).text = this.intent.extras!!.getString(IntentExtraNames.PLAYER_2_NAME)!!
+    findViewById<TextView>(R.id.p1_score).text = "0"
+    findViewById<TextView>(R.id.p2_score).text = "0"
 
     fillBoardWithLetters()
     setUpBoardGrid()
