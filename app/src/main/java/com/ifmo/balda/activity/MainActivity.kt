@@ -109,6 +109,10 @@ class MainActivity : AppCompatActivity() {
       apply()
     }
   }
+
+  internal class TopicSelectorItem(val resourceId: Int, val text: String) {
+    override fun toString(): String = text
+  }
 }
 
 private fun Context.setOnClickTooltip(view: View, tooltipTextId: Int) {
@@ -116,8 +120,4 @@ private fun Context.setOnClickTooltip(view: View, tooltipTextId: Int) {
   view.setOnClickListener {
     it.performLongClick()
   }
-}
-
-private class TopicSelectorItem(val resourceId: Int, val text: String) {
-  override fun toString(): String = text
 }

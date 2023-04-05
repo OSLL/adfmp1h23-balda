@@ -19,5 +19,4 @@ fun withTooltip(resourceId: Int): Matcher<View> = withTooltip(
 fun withAnyText(): Matcher<View> = object : TypeSafeMatcher<View> () {
   override fun describeTo(description: Description) = Unit
   override fun matchesSafely(item: View): Boolean = item is TextView && item.text.isNotEmpty()
-
 }
