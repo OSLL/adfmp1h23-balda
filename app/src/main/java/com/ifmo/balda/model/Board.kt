@@ -65,31 +65,35 @@ class Board(height: Int, width: Int) {
       }
   }
 
-  val cells = Array(height) { i -> Array(width) { j ->
-    if (width % 2 == 1 && j == width - 2) {
-      cell(LEFT, RIGHT)
-    } else if (width % 2 == 1 && j == width - 1) {
-      if (i % 2 == 0) {
-        cell(DOWN, LEFT)
+  val cells = Array(height) { i ->
+    Array(width) { j ->
+      if (width % 2 == 1 && j == width - 2) {
+        cell(LEFT, RIGHT)
+      } else if (width % 2 == 1 && j == width - 1) {
+        if (i % 2 == 0) {
+          cell(DOWN, LEFT)
+        } else {
+          cell(UP, LEFT)
+        }
+      } else if (height % 2 == 1 && i == height - 2) {
+        cell(DOWN, UP)
+      } else if (height % 2 == 1 && i == height - 1) {
+        if (j % 2 == 0) {
+          cell(UP, RIGHT)
+        } else {
+          cell(UP, LEFT)
+        }
       } else {
-        cell(UP, LEFT)
+        when ((i % 2) to (j % 2)) {
+          0 to 0 -> cell(DOWN, RIGHT)
+          0 to 1 -> cell(DOWN, LEFT)
+          1 to 0 -> cell(UP, RIGHT)
+          1 to 1 -> cell(UP, LEFT)
+          else -> unreachable()
+        }
       }
-    } else if (height % 2 == 1 && i == height - 2) {
-      cell(DOWN, UP)
-    } else if (height % 2 == 1 && i == height - 1) {
-      if (j % 2 == 0) {
-        cell(UP, RIGHT)
-      } else {
-        cell(UP, LEFT)
-      }
-    } else when ((i % 2) to (j % 2)) {
-      0 to 0 -> cell(DOWN, RIGHT)
-      0 to 1 -> cell(DOWN, LEFT)
-      1 to 0 -> cell(UP, RIGHT)
-      1 to 1 -> cell(UP, LEFT)
-      else -> unreachable()
     }
-  } }
+  }
 
   init {
     require(height > 0 && width > 0)
@@ -131,22 +135,26 @@ class Board(height: Int, width: Int) {
 
     for ((i, row) in cells.withIndex()) {
       for ((j, cell) in row.withIndex()) {
-        val char = getChar?.invoke(i to j) ?: when (id(*cell.connection.indices.filter { cell.connection[it] }.toIntArray())) {
+        val char = getChar?.invoke(i to j) ?: when (
+          id(
+            *cell.connection.indices.filter { cell.connection[it] }.toIntArray()
+          )
+        ) {
           id() -> '•'
           id(UP) -> '│'
-          id(    LEFT) -> '─'
+          id(LEFT) -> '─'
           id(UP, LEFT) -> '┘'
-          id(          DOWN) -> '│'
-          id(UP,       DOWN) -> '│'
-          id(    LEFT, DOWN) -> '┐'
+          id(DOWN) -> '│'
+          id(UP, DOWN) -> '│'
+          id(LEFT, DOWN) -> '┐'
           id(UP, LEFT, DOWN) -> '┤'
-          id(                RIGHT) -> '─'
-          id(UP,             RIGHT) -> '└'
-          id(    LEFT,       RIGHT) -> '─'
-          id(UP, LEFT,       RIGHT) -> '┴'
-          id(          DOWN, RIGHT) -> '┌'
-          id(UP,       DOWN, RIGHT) -> '├'
-          id(    LEFT, DOWN, RIGHT) -> '┬'
+          id(RIGHT) -> '─'
+          id(UP, RIGHT) -> '└'
+          id(LEFT, RIGHT) -> '─'
+          id(UP, LEFT, RIGHT) -> '┴'
+          id(DOWN, RIGHT) -> '┌'
+          id(UP, DOWN, RIGHT) -> '├'
+          id(LEFT, DOWN, RIGHT) -> '┬'
           id(UP, LEFT, DOWN, RIGHT) -> '┼'
           else -> unreachable()
         }

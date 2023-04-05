@@ -86,7 +86,6 @@ class BoardGenerator(private val random: Random) {
       }
     }
 
-
     return board
   }
 }

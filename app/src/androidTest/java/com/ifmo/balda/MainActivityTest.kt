@@ -1,5 +1,7 @@
 package com.ifmo.balda
 
+import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -9,12 +11,15 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.matcher.ViewMatchers.isClickable
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withSpinnerText
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ifmo.balda.activity.HelpScreenActivity
 import com.ifmo.balda.activity.MainActivity
 import com.ifmo.balda.activity.StatScreenActivity
+import com.ifmo.balda.model.Topic
+import org.hamcrest.CoreMatchers.instanceOf
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
@@ -24,6 +29,12 @@ import org.junit.runner.RunWith
 class MainActivityTest {
   @get:Rule
   val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
+  private val buttonIdToResourceId = mapOf(
+    R.id.easyDifficultyButton to R.string.easy,
+    R.id.mediumDifficultyButton to R.string.medium,
+    R.id.hardDifficultyButton to R.string.hard
+  )
 
   companion object {
     @BeforeClass
@@ -63,20 +74,22 @@ class MainActivityTest {
 
   @Test
   fun testTopicSelector() {
-    onView(withId(R.id.topicSelector))
+    val topicSelector = onView(withId(R.id.topicSelector))
+    topicSelector
       .check(matches(isDisplayed()))
       .check(matches(isClickable()))
-    // TODO: probably find a way to check content
+
+    for ((idx, topic) in Topic.values().withIndex()) {
+      topicSelector.perform(click())
+      onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
+        .atPosition(idx)
+        .perform(click())
+      topicSelector.check(matches(withSpinnerText(topic.resourceId)))
+    }
   }
 
   @Test
   fun testDifficultyButtons() {
-    val buttonIdToResourceId = mapOf(
-      R.id.easyDifficultyButton to R.string.easy,
-      R.id.mediumDifficultyButton to R.string.medium,
-      R.id.hardDifficultyButton to R.string.hard
-    )
-
     for ((viewId, resourceId) in buttonIdToResourceId) {
       onView(withId(viewId))
         .check(matches(isDisplayed()))
@@ -103,5 +116,32 @@ class MainActivityTest {
       .check(matches(isClickable()))
       .check(matches(withTooltip(R.string.topic_help)))
       .perform(click())
+  }
+
+  @Test
+  fun testTopicPersists() {
+    for ((idx, topic) in Topic.values().withIndex()) {
+      onView(withId(R.id.topicSelector)).perform(click())
+      onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
+        .atPosition(idx)
+        .perform(click())
+      reopenApp()
+      onView(withId(R.id.topicSelector))
+        .check(matches(withSpinnerText(topic.resourceId)))
+    }
+  }
+
+  @Test
+  fun testDifficultyPersists() {
+    for ((buttonId, resourceId) in buttonIdToResourceId) {
+      onView(withId(buttonId)).perform(click())
+      reopenApp()
+      onView(withId(R.id.selectedDifficulty)).check(matches(withText(resourceId)))
+    }
+  }
+
+  private fun reopenApp() {
+    activityRule.scenario.close()
+    ActivityScenario.launch(MainActivity::class.java)
   }
 }

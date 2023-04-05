@@ -1,7 +1,9 @@
 package com.ifmo.balda
 
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isClickable
@@ -23,11 +25,11 @@ class NameChoosingActivityTest {
 
   @Test
   fun testSinglePlayer() {
-    onView(withId(R.id.startGame1PlayerButton)).perform(click())
+    openSinglePlayerScreen()
 
     onView(withId(R.id.player1Name))
       .check(matches(isDisplayed()))
-      .check(matches(withText(R.string.player)))
+      .check(matches(withAnyText()))
     onView(withId(R.id.player2Name))
       .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)))
     onView(withId(R.id.playButton))
@@ -38,17 +40,69 @@ class NameChoosingActivityTest {
 
   @Test
   fun testMultiplayer() {
-    onView(withId(R.id.startGame2PlayerButton)).perform(click())
+    openMultiPlayerScreen()
 
     onView(withId(R.id.player1Name))
       .check(matches(isDisplayed()))
-      .check(matches(withText(R.string.player1)))
+      .check(matches(withAnyText()))
     onView(withId(R.id.player2Name))
       .check(matches(isDisplayed()))
-      .check(matches(withText(R.string.player2)))
+      .check(matches(withAnyText()))
     onView(withId(R.id.playButton))
       .check(matches(isDisplayed()))
       .check(matches(isClickable()))
       .perform(click())
+  }
+
+  @Test
+  fun testSinglePlayerNamePersists() {
+    val nameToCheck = "TestPersist"
+
+    openSinglePlayerScreen()
+    onView(withId(R.id.player1Name))
+      .perform(replaceText(nameToCheck))
+    onView(withId(R.id.playButton))
+      .perform(click())
+    reopenApp()
+    openSinglePlayerScreen()
+
+    onView(withId(R.id.player1Name))
+      .check(matches(withText(nameToCheck)))
+  }
+
+  @Test
+  fun testMultiPlayerNamePersists() {
+    val nameToCheck1 = "TestPersist1"
+    val nameToCheck2 = "TestPersist2"
+
+    openMultiPlayerScreen()
+    onView(withId(R.id.player1Name))
+      .perform(replaceText(nameToCheck1))
+    onView(withId(R.id.player2Name))
+      .perform(replaceText(nameToCheck2))
+    onView(withId(R.id.playButton))
+      .perform(click())
+    reopenApp()
+    openMultiPlayerScreen()
+
+    onView(withId(R.id.player1Name))
+      .check(matches(withText(nameToCheck1)))
+    onView(withId(R.id.player2Name))
+      .check(matches(withText(nameToCheck2)))
+  }
+
+  private fun openSinglePlayerScreen() {
+    onView(withId(R.id.startGame1PlayerButton))
+      .perform(click())
+  }
+
+  private fun openMultiPlayerScreen() {
+    onView(withId(R.id.startGame2PlayerButton))
+      .perform(click())
+  }
+
+  private fun reopenApp() {
+    activityRule.scenario.close()
+    ActivityScenario.launch(MainActivity::class.java)
   }
 }
