@@ -1,5 +1,6 @@
 package com.ifmo.balda.activity
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -14,9 +15,11 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.edit
+import androidx.fragment.app.DialogFragment
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
@@ -110,24 +113,44 @@ class MainActivity : AppCompatActivity() {
   private fun getStartGameOnClickListener(prefs: SharedPreferences, mode: GameMode) = View.OnClickListener {
     val savedGame = prefs.getString(PreferencesKeys.singlePlayerSavedGame, null)
 
-    // TODO: Show dialog
-
-    val intent = if (savedGame == null) {
-      Intent(this, ChooseNameActivity::class.java).apply {
-        putExtra(IntentExtraNames.GAME_MODE, mode.name)
-      }
+    if (savedGame != null) {
+      ResumeSavedGameDialogFragment(
+        onPositive = { startActivity(getGameActivityIntent(mode, savedGame)) },
+        onNegative = { startActivity(getChooseNameActivityIntent(mode)) }
+      )
+        .show(supportFragmentManager, "Start game dialog")
     } else {
-      Intent(this, GameActivity::class.java).apply {
-        putExtra(IntentExtraNames.GAME_MODE, mode.name)
-        putExtra(IntentExtraNames.SAVED_GAME, savedGame)
-      }
+      startActivity(getChooseNameActivityIntent(mode))
     }
+  }
 
-    startActivity(intent)
+  private fun getChooseNameActivityIntent(mode: GameMode) = Intent(this, ChooseNameActivity::class.java)
+    .apply { putExtra(IntentExtraNames.GAME_MODE, mode.name) }
+
+  private fun getGameActivityIntent(mode: GameMode, savedGame: String) = Intent(
+    this,
+    GameActivity::class.java
+  ).apply {
+    putExtra(IntentExtraNames.GAME_MODE, mode.name)
+    putExtra(IntentExtraNames.SAVED_GAME, savedGame)
   }
 
   internal class TopicSelectorItem(val resourceId: Int, val text: String) {
     override fun toString(): String = text
+  }
+
+  class ResumeSavedGameDialogFragment(
+    private val onPositive: () -> Unit,
+    private val onNegative: () -> Unit
+  ) : DialogFragment() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = activity?.let {
+      with(AlertDialog.Builder(it)) {
+        setMessage(R.string.resumeSavedGamePrompt)
+        setPositiveButton(R.string.yes) { _, _ -> onPositive() }
+        setNegativeButton(R.string.no) { _, _ -> onNegative() }
+        create()
+      }
+    } ?: throw IllegalStateException("Activity cannot be null")
   }
 }
 
