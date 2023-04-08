@@ -1,6 +1,7 @@
 package com.ifmo.balda.activity
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.content.edit
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
@@ -37,23 +39,33 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
+    val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
+
     findViewById<ImageButton>(R.id.statButton).setOnClickActivity(this, StatScreenActivity::class)
     findViewById<ImageButton>(R.id.helpButton).setOnClickActivity(this, HelpScreenActivity::class)
 
-    findViewById<Button>(R.id.startGame1PlayerButton).setOnClickActivity(
-      this,
-      ChooseNameActivity::class,
-      IntentExtraNames.GAME_MODE to { GameMode.SINGLE_PLAYER.name }
+    findViewById<Button>(R.id.startGame1PlayerButton).setOnClickListener(
+      getStartGameOnClickListener(prefs, GameMode.SINGLE_PLAYER)
     )
-    findViewById<Button>(R.id.startGame2PlayerButton).setOnClickActivity(
-      this,
-      ChooseNameActivity::class,
-      IntentExtraNames.GAME_MODE to { GameMode.MULTIPLAYER.name }
+    findViewById<Button>(R.id.startGame2PlayerButton).setOnClickListener(
+      getStartGameOnClickListener(prefs, GameMode.MULTIPLAYER)
     )
 
-    with(getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)) {
-      initDifficultyBlock(this)
-      initTopicBlock(this)
+    initDifficultyBlock(prefs)
+    initTopicBlock(prefs)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    val checkedDifficultyButton = findViewById<RadioGroup>(R.id.difficultyButtonsGroup).checkedRadioButtonId
+    val selectedDifficulty = buttonIdToDifficulty[checkedDifficultyButton]!!
+
+    val selectedTopicItem = findViewById<Spinner>(R.id.topicSelector).selectedItem as TopicSelectorItem
+    val selectedTopic = Topic.fromResourceId(selectedTopicItem.resourceId).getOrThrow()
+
+    getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).edit {
+      putString(PreferencesKeys.difficulty, selectedDifficulty.name)
+      putString(PreferencesKeys.topic, selectedTopic.name)
     }
   }
 
@@ -72,7 +84,7 @@ class MainActivity : AppCompatActivity() {
       }
     )
 
-    val savedTopic = Topic.valueOf(prefs.getString(PreferencesKeys.topicKey, Topic.ALL.name)!!)
+    val savedTopic = Topic.valueOf(prefs.getString(PreferencesKeys.topic, Topic.ALL.name)!!)
     selector.setSelection(values.indexOfFirst { it.resourceId == savedTopic.resourceId })
   }
 
@@ -91,23 +103,27 @@ class MainActivity : AppCompatActivity() {
       findViewById<RadioButton>(key).setOnCheckedChangeListener(difficultyChangeHandler)
     }
 
-    val selectedDifficulty = Difficulty.valueOf(prefs.getString(PreferencesKeys.difficultyKey, Difficulty.EASY.name)!!)
+    val selectedDifficulty = Difficulty.valueOf(prefs.getString(PreferencesKeys.difficulty, Difficulty.EASY.name)!!)
     findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(difficultyToButtonId[selectedDifficulty]!!)
   }
 
-  override fun onPause() {
-    super.onPause()
-    val checkedDifficultyButton = findViewById<RadioGroup>(R.id.difficultyButtonsGroup).checkedRadioButtonId
-    val selectedDifficulty = buttonIdToDifficulty[checkedDifficultyButton]!!
+  private fun getStartGameOnClickListener(prefs: SharedPreferences, mode: GameMode) = View.OnClickListener {
+    val savedGame = prefs.getString(PreferencesKeys.singlePlayerSavedGame, null)
 
-    val selectedTopicItem = findViewById<Spinner>(R.id.topicSelector).selectedItem as TopicSelectorItem
-    val selectedTopic = Topic.fromResourceId(selectedTopicItem.resourceId).getOrThrow()
+    // TODO: Show dialog
 
-    with(getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).edit()) {
-      putString(PreferencesKeys.difficultyKey, selectedDifficulty.name)
-      putString(PreferencesKeys.topicKey, selectedTopic.name)
-      apply()
+    val intent = if (savedGame == null) {
+      Intent(this, ChooseNameActivity::class.java).apply {
+        putExtra(IntentExtraNames.GAME_MODE, mode.name)
+      }
+    } else {
+      Intent(this, GameActivity::class.java).apply {
+        putExtra(IntentExtraNames.GAME_MODE, mode.name)
+        putExtra(IntentExtraNames.SAVED_GAME, savedGame)
+      }
     }
+
+    startActivity(intent)
   }
 
   internal class TopicSelectorItem(val resourceId: Int, val text: String) {

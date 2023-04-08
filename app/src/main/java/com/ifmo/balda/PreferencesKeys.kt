@@ -2,9 +2,11 @@ package com.ifmo.balda
 
 object PreferencesKeys {
   const val preferencesFileKey = "prefFile"
-  const val difficultyKey = "difficulty"
-  const val topicKey = "topic"
-  const val singlePlayerNameKey = "singlePlayerName"
-  const val multiPlayer1PlayerNameKey = "multiPlayer1PlayerName"
-  const val multiPlayer2PlayerNameKey = "multiPlayer2PlayerName"
+  const val difficulty = "difficulty"
+  const val topic = "topic"
+  const val singlePlayerName = "singlePlayerName"
+  const val multiPlayer1PlayerName = "multiPlayer1PlayerName"
+  const val multiPlayer2PlayerName = "multiPlayer2PlayerName"
+  const val singlePlayerSavedGame = "singlePlayerSavedGame"
+  const val multiPlayerSavedGame = "multiPlayerSavedGame"
 }

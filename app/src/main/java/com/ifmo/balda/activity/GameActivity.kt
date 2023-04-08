@@ -1,5 +1,6 @@
 package com.ifmo.balda.activity
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,18 +8,25 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
+import androidx.core.content.edit
 import com.ifmo.balda.IntentExtraNames
+import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
 import com.ifmo.balda.adapter.BoardGridAdapter
 import com.ifmo.balda.db
 import com.ifmo.balda.model.BoardGenerator
 import com.ifmo.balda.model.DictionaryGenerator
+import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.Topic
+import com.ifmo.balda.model.dto.GameDto
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.random.Random
 
 // Char is the letter at the position, List<Pair<Int, Int>> is the position of the word it belongs to
@@ -27,7 +35,22 @@ private typealias FilledBoard = Map<Coordinates, Pair<Char, List<Coordinates>>>
 
 class GameActivity : AppCompatActivity() {
   private val n = 8 // Depends on difficulty?
-  private val boardLetters = mutableListOf<String>()
+
+  // WARNING: properties below are safe to use ONLY in [onCreate] and after that
+  private val gameMode
+    get() = GameMode.valueOf(
+      intent.getStringExtra(IntentExtraNames.GAME_MODE)
+        ?: error("Missing required extra property ${IntentExtraNames.GAME_MODE}")
+    )
+
+  // Intent contains either player's names or saved game state.
+  // That's why access to this properties may throw NPE. Use with caution
+  private val player1Name
+    get() = this.intent.extras!!.getString(IntentExtraNames.PLAYER_1_NAME)!!
+  private val player2Name
+    get() = this.intent.extras!!.getString(IntentExtraNames.PLAYER_2_NAME)!!
+  private val savedGame
+    get() = this.intent.extras!!.getString(IntentExtraNames.SAVED_GAME)!!
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -37,8 +60,55 @@ class GameActivity : AppCompatActivity() {
       NavUtils.navigateUpTo(this, Intent(this, MainActivity::class.java))
     }
 
-    findViewById<TextView>(R.id.p1_name).text = this.intent.extras!!.getString(IntentExtraNames.PLAYER_1_NAME)!!
-    findViewById<TextView>(R.id.p2_name).text = this.intent.extras!!.getString(IntentExtraNames.PLAYER_2_NAME)!!
+    if (this.intent.extras!!.getString(IntentExtraNames.SAVED_GAME) == null) {
+      initDefault()
+    } else {
+      initFromSaved()
+    }
+  }
+
+  override fun onPause() {
+    super.onPause()
+    val board = findViewById<InterceptingGridView>(R.id.board)
+
+    if (board.adapter != null) {
+      getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).edit {
+        val key = when (gameMode) {
+          GameMode.SINGLE_PLAYER -> PreferencesKeys.singlePlayerSavedGame
+          GameMode.MULTIPLAYER -> PreferencesKeys.multiPlayerSavedGame
+        }
+
+        val adapter = board.adapter as BoardGridAdapter
+        putString(
+          key,
+          Json.encodeToString(
+            GameDto(
+              player1Name = player1Name,
+              player2Name = player2Name,
+              player1Score = findViewById<TextView>(R.id.p1_score).text.toString().toInt(),
+              player2Score = findViewById<TextView>(R.id.p2_score).text.toString().toInt(),
+              board = adapter.toDto()
+            )
+          )
+        )
+      }
+    }
+  }
+
+  private fun initFromSaved(): Unit = with(Json.decodeFromString<GameDto>(savedGame)) {
+    findViewById<TextView>(R.id.p1_name).text = player1Name
+    findViewById<TextView>(R.id.p2_name).text = player2Name
+    findViewById<TextView>(R.id.p1_score).text = player1Score.toString()
+    findViewById<TextView>(R.id.p2_score).text = player2Score.toString()
+    findViewById<InterceptingGridView>(R.id.board).apply {
+      numColumns = board.n
+      adapter = BoardGridAdapter(layoutInflater, board)
+    }
+  }
+
+  private fun initDefault() {
+    findViewById<TextView>(R.id.p1_name).text = player1Name
+    findViewById<TextView>(R.id.p2_name).text = player2Name
     findViewById<TextView>(R.id.p1_score).text = "0"
     findViewById<TextView>(R.id.p2_score).text = "0"
 
@@ -49,17 +119,17 @@ class GameActivity : AppCompatActivity() {
   }
 
   private fun setUpBoardGrid(board: FilledBoard) {
-    fillBoardWithLetters(board)
+    val boardLetters = fillBoardWithLetters(board)
     val gridView = findViewById<InterceptingGridView>(R.id.board)
     gridView.numColumns = n
     val boardGridAdapter = BoardGridAdapter(layoutInflater, boardLetters, n, board.values.map { it.second })
     gridView.adapter = boardGridAdapter
   }
 
-  private fun fillBoardWithLetters(board: FilledBoard) {
+  private fun fillBoardWithLetters(board: FilledBoard): List<String> = buildList {
     for (i in 0 until n) {
       for (j in 0 until n) {
-        boardLetters.add(board[i to j]!!.first.toString())
+        add(board[i to j]!!.first.toString())
       }
     }
   }
