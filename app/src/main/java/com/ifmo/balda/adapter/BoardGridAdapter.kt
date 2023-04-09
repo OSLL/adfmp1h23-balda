@@ -12,31 +12,55 @@ import android.widget.BaseAdapter
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatToggleButton
 import com.ifmo.balda.R
+import com.ifmo.balda.model.dto.BoardAdapterDto
 import kotlin.properties.Delegates
 
-class BoardGridAdapter(
+class BoardGridAdapter private constructor(
   private val layoutInflater: LayoutInflater,
-  private val letters: MutableList<String>,
   private val n: Int,
+  private val buttonStates: List<LetterButtonState>,
   private val wordPositions: List<List<Pair<Int, Int>>>
 ) : BaseAdapter() {
 
+  constructor(layoutInflater: LayoutInflater, dto: BoardAdapterDto) : this(
+    layoutInflater,
+    dto.n,
+    dto.buttonStates,
+    dto.wordPositions
+  )
+  constructor(
+    layoutInflater: LayoutInflater,
+    letters: List<String>,
+    n: Int,
+    wordPositions: List<List<Pair<Int, Int>>>
+  ) : this(
+    layoutInflater,
+    n,
+    letters.withIndex().map { (idx, letter) -> LetterButtonState(position = idx, value = letter) },
+    wordPositions
+  )
+
   private var currentWord = linkedSetOf<LetterButton>()
 
-  override fun getCount() = letters.size
+  override fun getCount() = buttonStates.size
 
-  override fun getItem(position: Int): String = letters[position]
+  override fun getItem(position: Int): String = buttonStates[position].value
 
   override fun getItemId(position: Int): Long = position.toLong()
 
   override fun getView(position: Int, grid: View?, parent: ViewGroup?): View {
     return grid ?: (layoutInflater.inflate(R.layout.letter, null) as LetterButton).apply {
-      this.position = position
-      setLetterValue(getItem(position))
+      init(buttonStates[position])
       setOnClickListener(getOnLetterClickListener(position))
       setOnTouchListener(getOnLetterTouchListener(this, position))
     }
   }
+
+  fun toDto(): BoardAdapterDto = BoardAdapterDto(
+    n,
+    buttonStates,
+    wordPositions
+  )
 
   private fun getOnLetterClickListener(i: Int): View.OnClickListener {
     return View.OnClickListener {
@@ -44,18 +68,18 @@ class BoardGridAdapter(
     }
   }
 
-  private fun getOnLetterTouchListener(letter: LetterButton, i: Int): View.OnTouchListener {
+  private fun getOnLetterTouchListener(letter: LetterButton, position: Int): View.OnTouchListener {
     return View.OnTouchListener { v, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
-          Log.d("touch", "letter $i")
+          Log.d("touch", "letter $position")
           currentWord = linkedSetOf(letter)
           return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_MOVE -> {
-          Log.d("move", "letter $i")
+          Log.d("move", "letter $position")
           Log.d("currWord", getCurrentWord())
-          currentWord.indexOfFirst { it.position == i }.takeIf { it != -1 }
+          currentWord.indexOfFirst { it.position == position }.takeIf { it != -1 }
             ?.let { letterPos ->
               repeat(currentWord.indices.last - letterPos) {
                 currentWord.last().performClick()
@@ -66,21 +90,27 @@ class BoardGridAdapter(
           if (!letter.isActivated) {
             return@OnTouchListener true
           }
-          if (!isLetterValid(i)) {
-            Log.d("move", "letter $i is not valid")
+          if (!isLetterValid(position)) {
+            Log.d("move", "letter $position is not valid")
             return@OnTouchListener true
           }
           currentWord.add(letter)
           return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_UP -> {
-          Log.d("up", "letter $i")
+          Log.d("up", "letter $position")
           val isValid = isCurrentWordValid()
           if (isValid) {
             val color = getRandomColor()
             currentWord.forEach {
               it.setBackgroundColor(color)
               it.isActivated = false
+
+              // TODO: Is there a way for LetterButton and LetterButtonState share same state
+              it.state.apply {
+                this.color = color
+                isActive = false
+              }
             }
           } else {
             Toast.makeText(v.context, "Слово ${getCurrentWord()} не загадывали", Toast.LENGTH_LONG).show()
@@ -122,18 +152,33 @@ class BoardGridAdapter(
     )
   }
 
+  @kotlinx.serialization.Serializable
+  data class LetterButtonState(
+    val position: Int,
+    var isActive: Boolean = true,
+    var color: Int? = null,
+    val value: String
+  )
+
   class LetterButton : AppCompatToggleButton {
     var position by Delegates.notNull<Int>()
-
-    init {
-      isActivated = true
-    }
+    var state by Delegates.notNull<LetterButtonState>()
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    fun setLetterValue(value: String) {
+    internal fun init(state: LetterButtonState) {
+      position = state.position
+      setLetterValue(state.value)
+      isActivated = state.isActive
+      if (state.color != null) {
+        setBackgroundColor(state.color!!)
+      }
+      this.state = state
+    }
+
+    private fun setLetterValue(value: String) {
       text = value
       textOn = value
       textOff = value

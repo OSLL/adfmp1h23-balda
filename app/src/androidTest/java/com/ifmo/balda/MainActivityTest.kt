@@ -1,5 +1,6 @@
 package com.ifmo.balda
 
+import android.content.Context
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
@@ -15,11 +16,15 @@ import androidx.test.espresso.matcher.ViewMatchers.withSpinnerText
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.ifmo.balda.activity.ChooseNameActivity
+import com.ifmo.balda.activity.GameActivity
 import com.ifmo.balda.activity.HelpScreenActivity
 import com.ifmo.balda.activity.MainActivity
 import com.ifmo.balda.activity.StatScreenActivity
 import com.ifmo.balda.model.Topic
 import org.hamcrest.CoreMatchers.instanceOf
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
@@ -30,18 +35,23 @@ class MainActivityTest {
   @get:Rule
   val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
-  private val buttonIdToResourceId = mapOf(
-    R.id.easyDifficultyButton to R.string.easy,
-    R.id.mediumDifficultyButton to R.string.medium,
-    R.id.hardDifficultyButton to R.string.hard
-  )
-
   companion object {
     @BeforeClass
     @JvmStatic
     fun init() {
       Intents.init()
     }
+
+    private val buttonIdToResourceId = mapOf(
+      R.id.easyDifficultyButton to R.string.easy,
+      R.id.mediumDifficultyButton to R.string.medium,
+      R.id.hardDifficultyButton to R.string.hard
+    )
+  }
+
+  @Before
+  fun setup() {
+    clearPreferences()
   }
 
   @Test
@@ -120,28 +130,87 @@ class MainActivityTest {
 
   @Test
   fun testTopicPersists() {
+    activityRule.scenario.close() // For this test we will manage activities manually
+
     for ((idx, topic) in Topic.values().withIndex()) {
-      onView(withId(R.id.topicSelector)).perform(click())
-      onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
-        .atPosition(idx)
-        .perform(click())
-      reopenApp()
-      onView(withId(R.id.topicSelector))
-        .check(matches(withSpinnerText(topic.resourceId)))
+      launch().use {
+        onView(withId(R.id.topicSelector)).perform(click())
+        onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
+          .atPosition(idx)
+          .perform(click())
+      }
+
+      launch().use {
+        onView(withId(R.id.topicSelector))
+          .check(matches(withSpinnerText(topic.resourceId)))
+      }
     }
   }
 
   @Test
   fun testDifficultyPersists() {
+    activityRule.scenario.close() // For this test we will manage activities manually
+
     for ((buttonId, resourceId) in buttonIdToResourceId) {
-      onView(withId(buttonId)).perform(click())
-      reopenApp()
-      onView(withId(R.id.selectedDifficulty)).check(matches(withText(resourceId)))
+      launch().use { onView(withId(buttonId)).perform(click()) }
+      launch().use { onView(withId(R.id.selectedDifficulty)).check(matches(withText(resourceId))) }
     }
   }
 
-  private fun reopenApp() {
+  @Test
+  fun testGameResumeDialogAppear() {
+    triggerGameResumeDialog()
+    onView(withText(R.string.resumeSavedGamePrompt))
+      .check(matches(isDisplayed()))
+  }
+
+  @Test
+  fun testGameResumeAgreed() {
+    triggerGameResumeDialog()
+    onView(withText(R.string.yes)).perform(click())
+    intended(hasComponent(GameActivity::class.java.name), last())
+  }
+
+  @Test
+  fun testGameResumeRejected() {
+    triggerGameResumeDialog()
+    onView(withText(R.string.no)).perform(click())
+    intended(hasComponent(ChooseNameActivity::class.java.name), last())
+  }
+
+  @Test
+  fun testGameModesSavedIndependently() {
+    onView(withId(R.id.startGame1PlayerButton)).perform(click())
+    onView(withId(R.id.playButton)).perform(click())
+    waitViewShown(withId(R.id.board))
+    reopenApp()
+    onView(withId(R.id.startGame2PlayerButton)).perform(click())
+    intended(hasComponent(ChooseNameActivity::class.java.name), last())
+  }
+
+  private fun clearPreferences() {
+    InstrumentationRegistry.getInstrumentation().targetContext.getSharedPreferences(
+      PreferencesKeys.preferencesFileKey,
+      Context.MODE_PRIVATE
+    ).edit().clear().apply()
+  }
+
+  private fun triggerGameResumeDialog() {
+    onView(withId(R.id.startGame1PlayerButton)).perform(click())
+    onView(withId(R.id.playButton)).perform(click())
+    waitViewShown(withId(R.id.board))
+    reopenApp()
+    onView(withId(R.id.startGame1PlayerButton)).perform(click())
+  }
+
+  private fun launch() = ActivityScenario.launch(MainActivity::class.java)
+
+  // Works only one time per test.
+  // If you need reopen app multiple times do it via creating scenario manually for each time
+  // @see [launch]
+  private fun reopenApp(clearPrefs: Boolean = false) {
     activityRule.scenario.close()
+    if (clearPrefs) clearPreferences()
     ActivityScenario.launch(MainActivity::class.java)
   }
 }

@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
+import androidx.core.content.edit
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
@@ -39,18 +40,18 @@ class ChooseNameActivity : AppCompatActivity() {
       GameMode.SINGLE_PLAYER -> {
         player2NameEdit.visibility = View.GONE
 
-        val playerName = prefs.getString(PreferencesKeys.singlePlayerNameKey, resources.getString(R.string.player))!!
+        val playerName = prefs.getString(PreferencesKeys.singlePlayerName, resources.getString(R.string.player))!!
         player1NameEdit.setHint(R.string.playerName)
         player1NameEdit.setText(playerName)
         player1NameEdit.setSelection(player1NameEdit.text.length)
       }
       GameMode.MULTIPLAYER -> {
         val player1Name = prefs.getString(
-          PreferencesKeys.multiPlayer1PlayerNameKey,
+          PreferencesKeys.multiPlayer1PlayerName,
           resources.getString(R.string.player1)
         )!!
         val player2Name = prefs.getString(
-          PreferencesKeys.multiPlayer2PlayerNameKey,
+          PreferencesKeys.multiPlayer2PlayerName,
           resources.getString(R.string.player2)
         )!!
 
@@ -73,28 +74,26 @@ class ChooseNameActivity : AppCompatActivity() {
             GameMode.MULTIPLAYER -> player2NameEdit.text.toString()
           }
         )
+        putExtra(IntentExtraNames.GAME_MODE, gameMode.toString())
       }
       saveNames(prefs, player1NameEdit, player2NameEdit)
       startActivity(intent)
     }
   }
 
-  private fun saveNames(prefs: SharedPreferences, player1NameEdit: EditText, player2NameEdit: EditText) {
-    with(prefs.edit()) {
-      when (gameMode) {
-        GameMode.SINGLE_PLAYER -> {
-          val playerName = player1NameEdit.text.toString()
-          putString(PreferencesKeys.singlePlayerNameKey, playerName)
-        }
-        GameMode.MULTIPLAYER -> {
-          val player1Name = player1NameEdit.text.toString()
-          val player2Name = player2NameEdit.text.toString()
-
-          putString(PreferencesKeys.multiPlayer1PlayerNameKey, player1Name)
-          putString(PreferencesKeys.multiPlayer2PlayerNameKey, player2Name)
-        }
+  private fun saveNames(prefs: SharedPreferences, player1NameEdit: EditText, player2NameEdit: EditText) = prefs.edit {
+    when (gameMode) {
+      GameMode.SINGLE_PLAYER -> {
+        val playerName = player1NameEdit.text.toString()
+        putString(PreferencesKeys.singlePlayerName, playerName)
       }
-      apply()
+      GameMode.MULTIPLAYER -> {
+        val player1Name = player1NameEdit.text.toString()
+        val player2Name = player2NameEdit.text.toString()
+
+        putString(PreferencesKeys.multiPlayer1PlayerName, player1Name)
+        putString(PreferencesKeys.multiPlayer2PlayerName, player2Name)
+      }
     }
   }
 }

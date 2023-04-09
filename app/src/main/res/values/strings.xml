@@ -24,7 +24,6 @@
   <string name="player1Name">Имя игрока 1</string>
   <string name="player2">Игрок 2</string>
   <string name="player2Name">Имя игрока 2</string>
-
   <string name="score">Счёт</string>
   <string name="time">Время</string>
   <string name="pause">Пауза</string>
@@ -33,6 +32,9 @@
   <string name="pass">Пропуск</string>
   <string name="tip">Помощь</string>
   <string name="bot">Bot</string>
+  <string name="yes">Да</string>
+  <string name="no">Нет</string>
+  <string name="resumeSavedGamePrompt">У вас есть незавершённая игра в этом режиме. Хотите продолжить?</string>
 
   <!-- Not an array because we need to distinguish one value from another -->
   <string name="topic_common">Общая</string>
