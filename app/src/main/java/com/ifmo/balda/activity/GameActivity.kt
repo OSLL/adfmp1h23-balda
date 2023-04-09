@@ -22,6 +22,7 @@ import com.ifmo.balda.model.dto.GameDto
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -35,22 +36,14 @@ private typealias FilledBoard = Map<Coordinates, Pair<Char, List<Coordinates>>>
 
 class GameActivity : AppCompatActivity() {
   private val n = 8 // Depends on difficulty?
+  private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-  // WARNING: properties below are safe to use ONLY in [onCreate] and after that
+  // WARNING: this property are safe to use ONLY in [onCreate] and after that
   private val gameMode
     get() = GameMode.valueOf(
       intent.getStringExtra(IntentExtraNames.GAME_MODE)
         ?: error("Missing required extra property ${IntentExtraNames.GAME_MODE}")
     )
-
-  // Intent contains either player's names or saved game state.
-  // That's why access to this properties may throw NPE. Use with caution
-  private val player1Name
-    get() = this.intent.extras!!.getString(IntentExtraNames.PLAYER_1_NAME)!!
-  private val player2Name
-    get() = this.intent.extras!!.getString(IntentExtraNames.PLAYER_2_NAME)!!
-  private val savedGame
-    get() = this.intent.extras!!.getString(IntentExtraNames.SAVED_GAME)!!
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -70,6 +63,7 @@ class GameActivity : AppCompatActivity() {
   override fun onPause() {
     super.onPause()
     val board = findViewById<InterceptingGridView>(R.id.board)
+    coroutineScope.cancel()
 
     if (board.adapter != null) {
       getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).edit {
@@ -83,8 +77,8 @@ class GameActivity : AppCompatActivity() {
           key,
           Json.encodeToString(
             GameDto(
-              player1Name = player1Name,
-              player2Name = player2Name,
+              player1Name = findViewById<TextView>(R.id.p1_name).text.toString(),
+              player2Name = findViewById<TextView>(R.id.p2_name).text.toString(),
               player1Score = findViewById<TextView>(R.id.p1_score).text.toString().toInt(),
               player2Score = findViewById<TextView>(R.id.p2_score).text.toString().toInt(),
               board = adapter.toDto()
@@ -95,7 +89,9 @@ class GameActivity : AppCompatActivity() {
     }
   }
 
-  private fun initFromSaved(): Unit = with(Json.decodeFromString<GameDto>(savedGame)) {
+  private fun initFromSaved(): Unit = with(
+    Json.decodeFromString<GameDto>(intent.getStringExtra(IntentExtraNames.SAVED_GAME)!!)
+  ) {
     findViewById<TextView>(R.id.p1_name).text = player1Name
     findViewById<TextView>(R.id.p2_name).text = player2Name
     findViewById<TextView>(R.id.p1_score).text = player1Score.toString()
@@ -107,12 +103,12 @@ class GameActivity : AppCompatActivity() {
   }
 
   private fun initDefault() {
-    findViewById<TextView>(R.id.p1_name).text = player1Name
-    findViewById<TextView>(R.id.p2_name).text = player2Name
+    findViewById<TextView>(R.id.p1_name).text = intent.getStringExtra(IntentExtraNames.PLAYER_1_NAME)!!
+    findViewById<TextView>(R.id.p2_name).text = intent.getStringExtra(IntentExtraNames.PLAYER_2_NAME)!!
     findViewById<TextView>(R.id.p1_score).text = "0"
     findViewById<TextView>(R.id.p2_score).text = "0"
 
-    CoroutineScope(Dispatchers.Default).launch {
+    coroutineScope.launch {
       val board = getBoard()
       runOnUiThread { setUpBoardGrid(board) }
     }

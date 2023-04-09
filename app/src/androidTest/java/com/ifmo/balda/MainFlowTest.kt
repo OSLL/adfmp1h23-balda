@@ -1,5 +1,6 @@
 package com.ifmo.balda
 
+import android.content.Context
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -8,7 +9,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.ifmo.balda.activity.MainActivity
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,6 +20,11 @@ import org.junit.runner.RunWith
 class MainFlowTest {
   @get:Rule
   val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
+  @Before
+  fun setup() {
+    clearPreferences()
+  }
 
   @Test
   fun testSinglePlayer() {
@@ -37,5 +45,12 @@ class MainFlowTest {
 
     onView(withId(R.id.p1_name)).check(matches(withText("Test1")))
     onView(withId(R.id.p2_name)).check(matches(withText("Test2")))
+  }
+
+  private fun clearPreferences() {
+    InstrumentationRegistry.getInstrumentation().targetContext.getSharedPreferences(
+      PreferencesKeys.preferencesFileKey,
+      Context.MODE_PRIVATE
+    ).edit().clear().apply()
   }
 }

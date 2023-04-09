@@ -15,7 +15,7 @@ import com.ifmo.balda.R
 import com.ifmo.balda.model.dto.BoardAdapterDto
 import kotlin.properties.Delegates
 
-class BoardGridAdapter(
+class BoardGridAdapter private constructor(
   private val layoutInflater: LayoutInflater,
   private val n: Int,
   private val buttonStates: List<LetterButtonState>,

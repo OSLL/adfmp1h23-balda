@@ -111,7 +111,11 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun getStartGameOnClickListener(prefs: SharedPreferences, mode: GameMode) = View.OnClickListener {
-    val savedGame = prefs.getString(PreferencesKeys.singlePlayerSavedGame, null)
+    val savedGameKey = when (mode) {
+      GameMode.SINGLE_PLAYER -> PreferencesKeys.singlePlayerSavedGame
+      GameMode.MULTIPLAYER -> PreferencesKeys.multiPlayerSavedGame
+    }
+    val savedGame = prefs.getString(savedGameKey, null)
 
     if (savedGame != null) {
       ResumeSavedGameDialogFragment(
