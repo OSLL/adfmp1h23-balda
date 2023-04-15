@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   id("com.android.application")
   kotlin("android")
@@ -37,9 +39,6 @@ android {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
   }
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
 }
 
 val roomVersion = "2.5.1"
@@ -61,4 +60,8 @@ dependencies {
   androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
   androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
   androidTestImplementation("androidx.test:runner:1.5.2")
+}
+
+tasks.withType<KotlinCompile> {
+  kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
 }
