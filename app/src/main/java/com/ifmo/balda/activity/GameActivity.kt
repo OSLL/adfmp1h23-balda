@@ -19,6 +19,7 @@ import com.ifmo.balda.model.DictionaryGenerator
 import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.Topic
 import com.ifmo.balda.model.dto.GameDto
+import com.ifmo.balda.setOnClickActivity
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +58,14 @@ class GameActivity : AppCompatActivity() {
       initDefault()
     } else {
       initFromSaved()
+    }
+
+    findViewById<Button>(R.id.pause_button).setOnClickListener {
+      val intent = Intent(this, PauseActivity::class.java).apply {
+        putExtra(IntentExtraNames.CURRENT_PLAYER, "TODO")
+        putExtra(IntentExtraNames.TIME_REMAINING, 0)
+      }
+      startActivity(intent)
     }
   }
 

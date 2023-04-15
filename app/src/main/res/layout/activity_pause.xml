@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:orientation="vertical">
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Ваша игра на паузе"
+      android:textColor="?attr/colorOnBackground"
+      android:textSize="30sp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/current_player"
+        android:textColor="?attr/colorOnBackground" />
+      <TextView
+        android:id="@+id/currentPlayerName"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="?attr/colorOnBackground" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/time_remaining"
+        android:textColor="?attr/colorOnBackground" />
+      <TextView
+        android:id="@+id/timeRemaining"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="?attr/colorOnBackground" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+      android:id="@+id/resumeButton"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:text="@string/resume" />
+  </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
