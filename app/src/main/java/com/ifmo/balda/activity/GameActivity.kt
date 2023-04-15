@@ -19,7 +19,6 @@ import com.ifmo.balda.model.DictionaryGenerator
 import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.Topic
 import com.ifmo.balda.model.dto.GameDto
-import com.ifmo.balda.setOnClickActivity
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

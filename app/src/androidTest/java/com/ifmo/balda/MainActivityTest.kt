@@ -24,6 +24,7 @@ import com.ifmo.balda.activity.MainActivity
 import com.ifmo.balda.activity.StatScreenActivity
 import com.ifmo.balda.model.Topic
 import org.hamcrest.CoreMatchers.instanceOf
+import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
@@ -40,6 +41,12 @@ class MainActivityTest {
     @JvmStatic
     fun init() {
       Intents.init()
+    }
+
+    @AfterClass
+    @JvmStatic
+    fun release() {
+      Intents.release()
     }
 
     private val buttonIdToResourceId = mapOf(

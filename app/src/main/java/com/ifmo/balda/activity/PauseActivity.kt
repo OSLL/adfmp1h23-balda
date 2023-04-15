@@ -13,8 +13,8 @@ class PauseActivity : AppCompatActivity() {
     setContentView(R.layout.activity_pause)
 
     val (currentPlayer, timeRemaining) = with(this.intent) {
-      val currentPlayer = getStringExtra(IntentExtraNames.CURRENT_PLAYER) ?:
-        error("Missing required property '${IntentExtraNames.CURRENT_PLAYER}'")
+      val currentPlayer = getStringExtra(IntentExtraNames.CURRENT_PLAYER)
+        ?: error("Missing required property '${IntentExtraNames.CURRENT_PLAYER}'")
       val timeRemaining = getIntExtra(IntentExtraNames.TIME_REMAINING, -1)
       if (timeRemaining == -1) error("Missing required property '${IntentExtraNames.TIME_REMAINING}'")
 
