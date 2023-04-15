@@ -41,5 +41,8 @@
   <string name="topic_all">Все</string>
   <string name="topic_programming">Программирование</string>
   <string name="topic_dota2">Dota 2</string>
+  <string name="resume">Продолжить</string>
+  <string name="time_remaining">Осталось времени:</string>
+  <string name="current_player">Текущий игрок:</string>
 
 </resources>

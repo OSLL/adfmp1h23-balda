@@ -58,6 +58,14 @@ class GameActivity : AppCompatActivity() {
     } else {
       initFromSaved()
     }
+
+    findViewById<Button>(R.id.pause_button).setOnClickListener {
+      val intent = Intent(this, PauseActivity::class.java).apply {
+        putExtra(IntentExtraNames.CURRENT_PLAYER, "TODO")
+        putExtra(IntentExtraNames.TIME_REMAINING, 0)
+      }
+      startActivity(intent)
+    }
   }
 
   override fun onPause() {
