@@ -1,11 +1,12 @@
 package com.ifmo.balda.model.dto
 
+import com.ifmo.balda.model.PlayerNumber
+
 @kotlinx.serialization.Serializable
 data class GameDto(
-  val player1Name: String,
-  val player2Name: String,
-  val player1Score: Int,
-  val player2Score: Int,
+  val player1: PlayerDto,
+  val player2: PlayerDto,
+  val currentPlayer: PlayerNumber,
   // TODO: save time and turn
   val board: BoardAdapterDto
 )

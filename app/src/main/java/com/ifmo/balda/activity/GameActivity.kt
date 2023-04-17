@@ -1,5 +1,6 @@
 package com.ifmo.balda.activity
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -17,8 +18,10 @@ import com.ifmo.balda.db
 import com.ifmo.balda.model.BoardGenerator
 import com.ifmo.balda.model.DictionaryGenerator
 import com.ifmo.balda.model.GameMode
+import com.ifmo.balda.model.PlayerNumber
 import com.ifmo.balda.model.Topic
 import com.ifmo.balda.model.dto.GameDto
+import com.ifmo.balda.model.dto.PlayerDto
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +31,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.properties.Delegates
 import kotlin.random.Random
 
 // Char is the letter at the position, List<Pair<Int, Int>> is the position of the word it belongs to
@@ -44,6 +48,8 @@ class GameActivity : AppCompatActivity() {
       intent.getStringExtra(IntentExtraNames.GAME_MODE)
         ?: error("Missing required extra property ${IntentExtraNames.GAME_MODE}")
     )
+
+  private var currentPlayer by Delegates.notNull<PlayerNumber>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -80,19 +86,7 @@ class GameActivity : AppCompatActivity() {
           GameMode.MULTIPLAYER -> PreferencesKeys.multiPlayerSavedGame
         }
 
-        val adapter = board.adapter as BoardGridAdapter
-        putString(
-          key,
-          Json.encodeToString(
-            GameDto(
-              player1Name = findViewById<TextView>(R.id.p1_name).text.toString(),
-              player2Name = findViewById<TextView>(R.id.p2_name).text.toString(),
-              player1Score = findViewById<TextView>(R.id.p1_score).text.toString().toInt(),
-              player2Score = findViewById<TextView>(R.id.p2_score).text.toString().toInt(),
-              board = adapter.toDto()
-            )
-          )
-        )
+        putString(key, Json.encodeToString(dtoFromAdapter(board.adapter as BoardGridAdapter)))
       }
     }
   }
@@ -100,21 +94,36 @@ class GameActivity : AppCompatActivity() {
   private fun initFromSaved(): Unit = with(
     Json.decodeFromString<GameDto>(intent.getStringExtra(IntentExtraNames.SAVED_GAME)!!)
   ) {
-    findViewById<TextView>(R.id.p1_name).text = player1Name
-    findViewById<TextView>(R.id.p2_name).text = player2Name
-    findViewById<TextView>(R.id.p1_score).text = player1Score.toString()
-    findViewById<TextView>(R.id.p2_score).text = player2Score.toString()
+    findViewById<TextView>(R.id.p1_name).text = player1.name
+    findViewById<TextView>(R.id.p2_name).text = player2.name
+    findViewById<TextView>(R.id.p1_score).text = player1.score.toString()
+    findViewById<TextView>(R.id.p2_score).text = player2.score.toString()
     findViewById<InterceptingGridView>(R.id.board).apply {
-      numColumns = board.n
-      adapter = BoardGridAdapter(layoutInflater, board)
+      numColumns = board.nCols
+      adapter = BoardGridAdapter(
+        layoutInflater = layoutInflater,
+        dto = board,
+        onWordSelected = { onWordSelected(it) },
+        onLastWordSelectedCallback = { onGameEnded() }
+      )
+    }
+    this@GameActivity.currentPlayer = currentPlayer
+
+    findViewById<TextView>(R.id.currentPlayerName).text = when (currentPlayer) {
+      PlayerNumber.FIRST -> player1.name
+      PlayerNumber.SECOND -> player2.name
     }
   }
 
   private fun initDefault() {
-    findViewById<TextView>(R.id.p1_name).text = intent.getStringExtra(IntentExtraNames.PLAYER_1_NAME)!!
-    findViewById<TextView>(R.id.p2_name).text = intent.getStringExtra(IntentExtraNames.PLAYER_2_NAME)!!
+    val player1Name = intent.getStringExtra(IntentExtraNames.PLAYER_1_NAME)!!
+    val player2Name = intent.getStringExtra(IntentExtraNames.PLAYER_2_NAME)!!
+    findViewById<TextView>(R.id.p1_name).text = player1Name
+    findViewById<TextView>(R.id.p2_name).text = player2Name
     findViewById<TextView>(R.id.p1_score).text = "0"
     findViewById<TextView>(R.id.p2_score).text = "0"
+    currentPlayer = PlayerNumber.FIRST
+    findViewById<TextView>(R.id.currentPlayerName).text = player1Name
 
     coroutineScope.launch {
       val board = getBoard()
@@ -126,7 +135,14 @@ class GameActivity : AppCompatActivity() {
     val boardLetters = fillBoardWithLetters(board)
     val gridView = findViewById<InterceptingGridView>(R.id.board)
     gridView.numColumns = n
-    val boardGridAdapter = BoardGridAdapter(layoutInflater, boardLetters, n, board.values.map { it.second })
+    val boardGridAdapter = BoardGridAdapter(
+      layoutInflater = layoutInflater,
+      letters = boardLetters,
+      nCols = n,
+      wordPositions = board.values.map { it.second },
+      onWordSelected = { onWordSelected(it) },
+      onLastWordSelectedCallback = { onGameEnded() }
+    )
     gridView.adapter = boardGridAdapter
   }
 
@@ -165,4 +181,38 @@ class GameActivity : AppCompatActivity() {
 
     result
   }
+
+  private fun dtoFromAdapter(adapter: BoardGridAdapter) = GameDto(
+    player1 = PlayerDto(
+      name = findViewById<TextView>(R.id.p1_name).text.toString(),
+      score = findViewById<TextView>(R.id.p1_score).text.toString().toInt()
+    ),
+    player2 = PlayerDto(
+      name = findViewById<TextView>(R.id.p2_name).text.toString(),
+      score = findViewById<TextView>(R.id.p2_score).text.toString().toInt()
+    ),
+    currentPlayer = currentPlayer,
+    board = adapter.toDto()
+  )
+
+  @SuppressLint("SetTextI18n")
+  private fun onWordSelected(word: String): BoardGridAdapter.CallbackResult {
+    val scoreView: TextView = when (currentPlayer) {
+      PlayerNumber.FIRST -> findViewById(R.id.p1_score)
+      PlayerNumber.SECOND -> findViewById(R.id.p2_score)
+    }
+
+    // TODO: Confirmation dialog
+
+    scoreView.text = (scoreView.text.toString().toInt() + word.length).toString()
+
+    currentPlayer = when (currentPlayer) {
+      PlayerNumber.FIRST -> PlayerNumber.SECOND
+      PlayerNumber.SECOND -> PlayerNumber.FIRST
+    }
+
+    return BoardGridAdapter.CallbackResult.NOOP
+  }
+
+  private fun onGameEnded() = Unit
 }
