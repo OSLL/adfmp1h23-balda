@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import androidx.core.content.edit
@@ -22,6 +23,7 @@ import com.ifmo.balda.model.PlayerNumber
 import com.ifmo.balda.model.Topic
 import com.ifmo.balda.model.dto.GameDto
 import com.ifmo.balda.model.dto.PlayerDto
+import com.ifmo.balda.model.entity.Stat
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +36,7 @@ import kotlinx.serialization.json.Json
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-// Char is the letter at the position, List<Pair<Int, Int>> is the position of the word it belongs to
+// Char is the letter at the position, List<Coordinates> is the position of the word it belongs to
 private typealias Coordinates = Pair<Int, Int>
 private typealias FilledBoard = Map<Coordinates, Pair<Char, List<Coordinates>>>
 
@@ -55,9 +57,7 @@ class GameActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_game)
 
-    findViewById<Button>(R.id.menu_button).setOnClickListener {
-      NavUtils.navigateUpTo(this, Intent(this, MainActivity::class.java))
-    }
+    findViewById<Button>(R.id.menu_button).setOnClickListener { toMainMenu() }
 
     if (this.intent.extras!!.getString(IntentExtraNames.SAVED_GAME) == null) {
       initDefault()
@@ -67,11 +67,19 @@ class GameActivity : AppCompatActivity() {
 
     findViewById<Button>(R.id.pause_button).setOnClickListener {
       val intent = Intent(this, PauseActivity::class.java).apply {
-        putExtra(IntentExtraNames.CURRENT_PLAYER, "TODO")
+        putExtra(
+          IntentExtraNames.CURRENT_PLAYER,
+          when (currentPlayer) {
+            PlayerNumber.FIRST -> findViewById<TextView>(R.id.p1_name).text.toString()
+            PlayerNumber.SECOND -> findViewById<TextView>(R.id.p2_name).text.toString()
+          }
+        )
         putExtra(IntentExtraNames.TIME_REMAINING, 0)
       }
       startActivity(intent)
     }
+
+    findViewById<Button>(R.id.pass_button).setOnClickListener { /* TODO: Confirmation */ changeCurrentPlayer() }
   }
 
   override fun onPause() {
@@ -109,7 +117,7 @@ class GameActivity : AppCompatActivity() {
     }
     this@GameActivity.currentPlayer = currentPlayer
 
-    findViewById<TextView>(R.id.currentPlayerName).text = when (currentPlayer) {
+    findViewById<TextView>(R.id.current_player).text = when (currentPlayer) {
       PlayerNumber.FIRST -> player1.name
       PlayerNumber.SECOND -> player2.name
     }
@@ -123,7 +131,7 @@ class GameActivity : AppCompatActivity() {
     findViewById<TextView>(R.id.p1_score).text = "0"
     findViewById<TextView>(R.id.p2_score).text = "0"
     currentPlayer = PlayerNumber.FIRST
-    findViewById<TextView>(R.id.currentPlayerName).text = player1Name
+    findViewById<TextView>(R.id.current_player).text = player1Name
 
     coroutineScope.launch {
       val board = getBoard()
@@ -139,11 +147,15 @@ class GameActivity : AppCompatActivity() {
       layoutInflater = layoutInflater,
       letters = boardLetters,
       nCols = n,
-      wordPositions = board.values.map { it.second },
+      wordPositions = board.values.map { it.second }.toSet().toList(),
       onWordSelected = { onWordSelected(it) },
       onLastWordSelectedCallback = { onGameEnded() }
     )
     gridView.adapter = boardGridAdapter
+  }
+
+  private fun toMainMenu() {
+    NavUtils.navigateUpTo(this, Intent(this, MainActivity::class.java))
   }
 
   private fun fillBoardWithLetters(board: FilledBoard): List<String> = buildList {
@@ -195,24 +207,62 @@ class GameActivity : AppCompatActivity() {
     board = adapter.toDto()
   )
 
-  @SuppressLint("SetTextI18n")
-  private fun onWordSelected(word: String): BoardGridAdapter.CallbackResult {
-    val scoreView: TextView = when (currentPlayer) {
-      PlayerNumber.FIRST -> findViewById(R.id.p1_score)
-      PlayerNumber.SECOND -> findViewById(R.id.p2_score)
-    }
-
-    // TODO: Confirmation dialog
-
-    scoreView.text = (scoreView.text.toString().toInt() + word.length).toString()
-
+  private fun changeCurrentPlayer() {
     currentPlayer = when (currentPlayer) {
       PlayerNumber.FIRST -> PlayerNumber.SECOND
       PlayerNumber.SECOND -> PlayerNumber.FIRST
     }
 
-    return BoardGridAdapter.CallbackResult.NOOP
+    findViewById<TextView>(R.id.current_player).text = when (currentPlayer) {
+      PlayerNumber.FIRST -> findViewById<TextView>(R.id.p1_name).text.toString()
+      PlayerNumber.SECOND -> findViewById<TextView>(R.id.p2_name).text.toString()
+    }
   }
 
-  private fun onGameEnded() = Unit
+  @SuppressLint("SetTextI18n")
+  private fun onWordSelected(word: String) {
+    val scoreView: TextView = when (currentPlayer) {
+      PlayerNumber.FIRST -> findViewById(R.id.p1_score)
+      PlayerNumber.SECOND -> findViewById(R.id.p2_score)
+    }
+
+    // TODO: Confirmation dialog?
+
+    scoreView.text = (scoreView.text.toString().toInt() + word.length).toString()
+    changeCurrentPlayer()
+  }
+
+  @SuppressLint("CutPasteId")
+  private fun onGameEnded() {
+    Log.d("GameActivity", "onGameEnded")
+    // Cannot use activity-local scope as it will be cancelled
+    val scope = CoroutineScope(Dispatchers.IO)
+    val dao = db.statDao()
+
+    when (gameMode) {
+      GameMode.SINGLE_PLAYER -> {
+        val playerStat = Stat(
+          name = findViewById<TextView>(R.id.p1_name).text.toString(),
+          score = findViewById<TextView>(R.id.p1_score).text.toString().toInt()
+        )
+        scope.launch { dao.updateStats(playerStat) }
+      }
+      GameMode.MULTIPLAYER -> {
+        val player1Stat = Stat(
+          name = findViewById<TextView>(R.id.p1_name).text.toString(),
+          score = findViewById<TextView>(R.id.p1_score).text.toString().toInt()
+        )
+        val player2Stat = Stat(
+          name = findViewById<TextView>(R.id.p2_name).text.toString(),
+          score = findViewById<TextView>(R.id.p2_score).text.toString().toInt()
+        )
+
+        scope.launch { dao.updateStats(player1Stat, player2Stat) }
+      }
+    }
+
+    // TODO: Find a way to remove saved game
+    Toast.makeText(applicationContext, "Игра завершена", Toast.LENGTH_LONG).show()
+    toMainMenu()
+  }
 }

@@ -15,7 +15,7 @@ import com.ifmo.balda.R
 import com.ifmo.balda.model.dto.BoardAdapterDto
 import kotlin.properties.Delegates
 
-private typealias onWordSelectedCallback = (word: String) -> BoardGridAdapter.CallbackResult
+private typealias onWordSelectedCallback = (word: String) -> Unit
 private typealias onLastWordSelectedCallback = () -> Unit
 
 class BoardGridAdapter private constructor(
@@ -56,7 +56,7 @@ class BoardGridAdapter private constructor(
     onLastWordSelectedCallback
   )
 
-  private var currentWord = linkedSetOf<LetterButton>()
+  private var currentWord = mutableListOf<LetterButton>()
 
   override fun getCount() = buttonStates.size
 
@@ -85,16 +85,11 @@ class BoardGridAdapter private constructor(
   }
 
   private fun getOnLetterTouchListener(letter: LetterButton, position: Int): View.OnTouchListener {
-    val cancelSelection = {
-      currentWord.forEach { it.performClick() }
-      currentWord = linkedSetOf()
-    }
-
     return View.OnTouchListener { v, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           Log.d("touch", "letter $position")
-          currentWord = linkedSetOf(letter)
+          currentWord = mutableListOf(letter)
           return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_MOVE -> {
@@ -124,19 +119,10 @@ class BoardGridAdapter private constructor(
 
           if (!isValid) {
             Toast.makeText(v.context, "Слово ${getCurrentWord()} не загадывали", Toast.LENGTH_LONG).show()
-            cancelSelection()
+            currentWord.forEach { it.performClick() }
+            currentWord = mutableListOf()
             return@OnTouchListener true
           }
-
-          val callbackResult = onWordSelected(getCurrentWord())
-
-          if (callbackResult == CallbackResult.CANCEL) {
-            cancelSelection()
-            return@OnTouchListener true
-          }
-
-          // TODO: remove word position
-          // TODO: handle game ending
 
           val color = getRandomColor()
           currentWord.forEach {
@@ -149,6 +135,11 @@ class BoardGridAdapter private constructor(
               isActive = false
             }
           }
+
+          onWordSelected(getCurrentWord())
+          Log.d("BoardGridAdapter", "Remove: ${wordPositions.remove(toPositions(currentWord))}")
+          Log.d("BoardGridAdapter", "Remaining: ${wordPositions.size}")
+          if (wordPositions.isEmpty()) onLastWordSelectedCallback()
 
           return@OnTouchListener true
         }
@@ -168,9 +159,10 @@ class BoardGridAdapter private constructor(
 
   private fun getCurrentWord() = currentWord.joinToString("") { it.text }
 
-  private fun isCurrentWordValid(): Boolean {
-    return currentWord.map { (it.position / nCols) to (it.position % nCols) } in wordPositions
-  }
+  private fun isCurrentWordValid(): Boolean = toPositions(currentWord) in wordPositions
+
+  private fun toPositions(word: List<LetterButton>): List<Pair<Int, Int>> =
+    word.map { (it.position / nCols) to (it.position % nCols) }
 
   private fun getRandomColor(): Int {
     return Color.HSVToColor(
@@ -216,10 +208,5 @@ class BoardGridAdapter private constructor(
       textOn = value
       textOff = value
     }
-  }
-
-  enum class CallbackResult {
-    NOOP,
-    CANCEL
   }
 }

@@ -7,6 +7,6 @@ data class GameDto(
   val player1: PlayerDto,
   val player2: PlayerDto,
   val currentPlayer: PlayerNumber,
-  // TODO: save time and turn
+  // TODO: save time
   val board: BoardAdapterDto
 )

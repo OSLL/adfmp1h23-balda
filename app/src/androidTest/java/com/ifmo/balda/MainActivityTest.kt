@@ -24,9 +24,8 @@ import com.ifmo.balda.activity.MainActivity
 import com.ifmo.balda.activity.StatScreenActivity
 import com.ifmo.balda.model.Topic
 import org.hamcrest.CoreMatchers.instanceOf
-import org.junit.AfterClass
+import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,18 +36,6 @@ class MainActivityTest {
   val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
   companion object {
-    @BeforeClass
-    @JvmStatic
-    fun init() {
-      Intents.init()
-    }
-
-    @AfterClass
-    @JvmStatic
-    fun release() {
-      Intents.release()
-    }
-
     private val buttonIdToResourceId = mapOf(
       R.id.easyDifficultyButton to R.string.easy,
       R.id.mediumDifficultyButton to R.string.medium,
@@ -58,7 +45,13 @@ class MainActivityTest {
 
   @Before
   fun setup() {
+    Intents.init()
     clearPreferences()
+  }
+
+  @After
+  fun teardown() {
+    Intents.release()
   }
 
   @Test

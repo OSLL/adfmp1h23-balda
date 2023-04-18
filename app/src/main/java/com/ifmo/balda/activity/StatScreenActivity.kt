@@ -19,6 +19,8 @@ class StatScreenActivity : AppCompatActivity() {
 
     CoroutineScope(Dispatchers.IO).launch {
       val stat = db.statDao().getStat()
+        .sortedBy { it.score }
+        .reversed()
       runOnUiThread {
         findViewById<ListView>(R.id.statList).adapter = StatListAdapter(
           this@StatScreenActivity,
