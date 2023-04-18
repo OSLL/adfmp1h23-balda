@@ -53,18 +53,27 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
-    selectLanguage(currentLanguage(prefs), prefs) // reset ui & persist
-
     setContentView(R.layout.activity_main)
-
     coroutineScope = CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+    val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
+
+    coroutineScope.launch {
+      val lang = currentLanguage(prefs)
+      runOnUiThread {
+        selectLanguage(lang, prefs) // reset ui & persist
+      }
+    }
 
     findViewById<Button>(R.id.langButton).setOnClickListener {
-      val languages = Lang.list + Lang.list // not to run out of bounds
-      val current = currentLanguage(prefs).code
-      val next = languages[1 + languages.indexOfFirst { it.code == current }]
-      selectLanguage(next, prefs)
+      coroutineScope.launch {
+        val languages = Lang.list(this@MainActivity) + Lang.list(this@MainActivity) // not to run out of bounds
+        val current = currentLanguage(prefs).code
+
+        runOnUiThread {
+          val next = languages[1 + languages.indexOfFirst { it.code == current }]
+          selectLanguage(next, prefs)
+        }
+      }
     }
 
     findViewById<ImageButton>(R.id.statButton).setOnClickActivity(this, StatScreenActivity::class)
@@ -264,8 +273,9 @@ private fun Context.setOnClickTooltip(view: View, tooltipTextId: Int) {
   }
 }
 
-fun currentLanguage(prefs: SharedPreferences): Lang {
-  return AppCompatDelegate.getApplicationLocales()[0]?.language?.let { Lang.byCode(it) }
-    ?: prefs.getString(PreferencesKeys.language, null)?.let { Lang.byCode(it) }
-    ?: Lang.default
+@LargeIO
+fun Context.currentLanguage(prefs: SharedPreferences): Lang {
+  return AppCompatDelegate.getApplicationLocales()[0]?.language?.let { Lang.byCode(it, this) }
+    ?: prefs.getString(PreferencesKeys.language, null)?.let { Lang.byCode(it, this) }
+    ?: Lang.default(this)
 }

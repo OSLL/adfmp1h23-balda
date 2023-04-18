@@ -19,11 +19,11 @@ class Dictionaries private constructor(
 
       val commonDictionaries = dictionaries
         .mapNotNull { commonDictRegex.matchEntire(it) }
-        .associateBy(keySelector = { Lang.byCode(it.groupValues[1]) }, valueTransform = { Path(dictDir, it.value) })
+        .associateBy(keySelector = { Lang(it.groupValues[1]) }, valueTransform = { Path(dictDir, it.value) })
 
       val thematicDictionaries = dictionaries
         .mapNotNull { thematicDictRegex.matchEntire(it) }
-        .groupBy(keySelector = { Lang.byCode(it.groupValues[1]) })
+        .groupBy(keySelector = { Lang(it.groupValues[1]) })
         .mapValues { (_, matches) ->
           matches.associateBy(keySelector = { Topic.Theme(it.groupValues[2]) }, valueTransform = { Path(dictDir, it.value) })
         }

@@ -90,7 +90,7 @@ class MainActivityTest {
       .check(matches(isDisplayed()))
       .check(matches(isClickable()))
 
-    val topics = context.dictionaries.topics(currentLanguage(context.prefs))
+    val topics = context.dictionaries.topics(context.currentLanguage(context.prefs))
     for ((idx, topic) in topics.withIndex()) {
       topicSelector.perform(click())
       onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
@@ -134,7 +134,7 @@ class MainActivityTest {
   fun testTopicPersists() {
     activityRule.scenario.close() // For this test we will manage activities manually
 
-    val topics = context.dictionaries.topics(currentLanguage(context.prefs))
+    val topics = context.dictionaries.topics(context.currentLanguage(context.prefs))
     for ((idx, topic) in topics.withIndex()) {
       launch().use {
         onView(withId(R.id.topicSelector)).perform(click())

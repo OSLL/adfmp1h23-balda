@@ -1,17 +1,22 @@
 package com.ifmo.balda.model.data
 
-import androidx.core.os.LocaleListCompat
+import android.content.Context
 
-class Lang private constructor(val code: String) {
+class Lang(val code: String) {
   companion object {
-    val list
-      get() = (0 until LocaleListCompat.getDefault().size())
-        .map { Lang(LocaleListCompat.getDefault()[it]!!.language) }
+    @LargeIO
+    fun list(ctx: Context): List<Lang> =
+      ctx.dictionaries.languages.toList()
 
-    val default get() = list.first()
+    @LargeIO
+    fun default(ctx: Context): Lang =
+      list(ctx).let { list ->
+        list.find { it.code.lowercase() == "ru" } ?: list.first()
+      }
 
-    fun byCode(code: String): Lang =
-      list.single { it.code == code }
+    @LargeIO
+    fun byCode(code: String, ctx: Context): Lang =
+      list(ctx).single { it.code == code }
   }
 
   override fun equals(other: Any?): Boolean {

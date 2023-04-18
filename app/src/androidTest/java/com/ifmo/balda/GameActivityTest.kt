@@ -77,7 +77,7 @@ class GameActivityTest {
     putExtra(IntentExtraNames.PLAYER_1_NAME, player1Name)
     putExtra(IntentExtraNames.PLAYER_2_NAME, player2Name)
     putExtra(IntentExtraNames.GAME_MODE, mode.name)
-    putExtra(IntentExtraNames.TOPIC, context.dictionaries.topics(currentLanguage(context.prefs)).first().name(context))
+    putExtra(IntentExtraNames.TOPIC, context.dictionaries.topics(context.currentLanguage(context.prefs)).first().name(context))
     putExtra(IntentExtraNames.DIFFICULTY, Difficulty.EASY.name)
   }
 }

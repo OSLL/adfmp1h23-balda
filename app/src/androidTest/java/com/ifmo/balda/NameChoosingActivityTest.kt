@@ -115,7 +115,7 @@ class NameChoosingActivityTest {
 
   private fun getIntent(mode: GameMode) = Intent(context, ChooseNameActivity::class.java).apply {
     putExtra(IntentExtraNames.GAME_MODE, mode.name)
-    putExtra(IntentExtraNames.TOPIC, context.dictionaries.topics(currentLanguage(context.prefs)).first().name(context))
+    putExtra(IntentExtraNames.TOPIC, context.dictionaries.topics(context.currentLanguage(context.prefs)).first().name(context))
     putExtra(IntentExtraNames.DIFFICULTY, Difficulty.EASY.name)
   }
 
