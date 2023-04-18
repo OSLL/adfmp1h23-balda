@@ -16,6 +16,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ifmo.balda.activity.ChooseNameActivity
+import com.ifmo.balda.activity.currentLanguage
+import com.ifmo.balda.model.data.dictionaries
+import com.ifmo.balda.model.Difficulty
 import com.ifmo.balda.model.GameMode
 import org.junit.Before
 import org.junit.Test
@@ -112,6 +115,8 @@ class NameChoosingActivityTest {
 
   private fun getIntent(mode: GameMode) = Intent(context, ChooseNameActivity::class.java).apply {
     putExtra(IntentExtraNames.GAME_MODE, mode.name)
+    putExtra(IntentExtraNames.TOPIC, context.dictionaries.topics(currentLanguage(context.prefs)).first().name(context))
+    putExtra(IntentExtraNames.DIFFICULTY, Difficulty.EASY.name)
   }
 
   private fun clearPreferences(): Unit = preferences.edit().clear().apply()

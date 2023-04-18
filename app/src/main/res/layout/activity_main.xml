@@ -22,7 +22,7 @@
       android:layout_height="50dp"
       android:layout_marginStart="10dp"
       android:background="@drawable/button_background"
-      android:text="@string/lang_ru"
+      android:text="@string/lang"
       android:textSize="12sp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintStart_toStartOf="parent"

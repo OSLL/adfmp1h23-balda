@@ -1,5 +1,7 @@
 package com.ifmo.balda
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.view.View
 import android.widget.TextView
 import androidx.test.espresso.Espresso.onView
@@ -46,3 +48,9 @@ fun last(): VerificationMode = VerificationMode { matcher, recordedIntents ->
     last.markAsVerified()
   }
 }
+
+val context: Context
+  get() = InstrumentationRegistry.getInstrumentation().targetContext
+
+val Context.prefs: SharedPreferences
+  get() = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)

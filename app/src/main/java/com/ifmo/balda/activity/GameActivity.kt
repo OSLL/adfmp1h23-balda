@@ -16,11 +16,14 @@ import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
 import com.ifmo.balda.adapter.BoardGridAdapter
 import com.ifmo.balda.db
+import com.ifmo.balda.model.data.LargeIO
+import com.ifmo.balda.model.data.dictionaries
 import com.ifmo.balda.model.BoardGenerator
 import com.ifmo.balda.model.DictionaryGenerator
+import com.ifmo.balda.model.Difficulty
 import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.PlayerNumber
-import com.ifmo.balda.model.Topic
+import com.ifmo.balda.model.data.Topic
 import com.ifmo.balda.model.dto.GameDto
 import com.ifmo.balda.model.dto.PlayerDto
 import com.ifmo.balda.model.entity.Stat
@@ -167,6 +170,7 @@ class GameActivity : AppCompatActivity() {
   }
 
   // todo: save state correctly
+  @LargeIO
   private suspend fun getBoard(): FilledBoard = Random.nextInt().let { seed ->
     Log.d("board", "seed is $seed")
     val random = Random(seed)
@@ -174,7 +178,29 @@ class GameActivity : AppCompatActivity() {
     val board = BoardGenerator(random).generate(n, n)
     val trajectory = board.getCluster(0 to 0)
 
-    val len2words = withContext(Dispatchers.IO) { db.wordDao().getLength2WordsByTopic(Topic.COMMON) }
+    val len2words = withContext(Dispatchers.IO) {
+      val topicName = intent.getStringExtra(IntentExtraNames.TOPIC)!!
+      val difficulty = intent.getStringExtra(IntentExtraNames.DIFFICULTY)!!.let { Difficulty.valueOf(it) }
+      val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
+      val topic = Topic.byName(topicName, this@GameActivity)
+
+      val dictionary = dictionaries.loadDictionary(currentLanguage(prefs), topic, this@GameActivity)
+
+      val frequencies = dictionary.values.map { it }.toSortedSet().toList()
+      val difficultEnd = frequencies[frequencies.size / 3]
+      val mediumEnd = frequencies[frequencies.size * 2 / 3]
+
+      dictionary
+        .filterValues {
+          it in when (difficulty) {
+            Difficulty.EASY -> mediumEnd until frequencies.last()
+            Difficulty.MEDIUM -> difficultEnd until mediumEnd
+            Difficulty.HARD -> 0 .. difficultEnd
+          }
+        }
+        .keys
+        .groupBy { it.length }
+    }
     val dict = DictionaryGenerator(random).generate(trajectory.size, len2words).shuffled(random)
     Log.d("board", "dict is ${dict.toList()}")
 

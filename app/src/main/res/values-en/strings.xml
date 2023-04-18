@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="lang">@string/lang_en</string>
+  <string name="app_title">BaldUh</string>
+  <string name="_1player">1 Player</string>
+  <string name="_2players">2 Players</string>
+  <string name="difficulty_column">Difficulty:</string>
+  <string name="difficulty_help">Defines the rarity of the words.</string>
+  <string name="easy">Easy</string>
+  <string name="medium">Medium</string>
+  <string name="hard">Hard</string>
+  <string name="topic_column">Topic:</string>
+  <string name="topic_help">The area the words come from. "Common" means commonly used words.</string>
+  <string name="game_description">In one sentence: find words in a grid of letters, and the longer the word, the more points you get!\n\n
+This fillword crossword game gives you the opportunity to play both a single-player game against a bot and a game of two people on the same device.\n\n
+You can pause the game, and you can leave it unfinished: it will be saved for when you return to play!
+  </string>
+  <string name="play">Play</string>
+  <string name="player">Player</string>
+  <string name="playerName">Player name</string>
+  <string name="player1">Player 1</string>
+  <string name="player1Name">Player 1 name</string>
+  <string name="player2">Player 2</string>
+  <string name="player2Name">Player 2 name</string>
+  <string name="score">Score</string>
+  <string name="time">Time</string>
+  <string name="pause">Pause</string>
+  <string name="turn">Turn</string>
+  <string name="menu">Menu</string>
+  <string name="pass">Pass</string>
+  <string name="tip">Tip</string>
+  <string name="bot">Bot 🤖</string>
+  <string name="yes">Yes</string>
+  <string name="no">Nah</string>
+  <string name="resumeSavedGamePrompt">Your previous game is restored. Resume it?</string>
+
+  <string name="resume">Resume</string>
+  <string name="time_remaining">Time left:</string>
+  <string name="current_player">Current player:</string>
+
+  <string name="topic_common">Common</string>
+  <string name="topic_programming">Prog</string>
+  <string name="topic_dota2">Dota 2</string>
+  <string name="topic_all">All</string>
+</resources>
