@@ -44,5 +44,6 @@
   <string name="resume">Продолжить</string>
   <string name="time_remaining">Осталось времени:</string>
   <string name="current_player">Текущий игрок:</string>
+    <string name="turn_column">Ход:</string>
 
 </resources>

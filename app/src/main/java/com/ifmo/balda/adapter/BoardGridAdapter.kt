@@ -15,32 +15,48 @@ import com.ifmo.balda.R
 import com.ifmo.balda.model.dto.BoardAdapterDto
 import kotlin.properties.Delegates
 
+private typealias onWordSelectedCallback = (word: String) -> Unit
+private typealias onLastWordSelectedCallback = () -> Unit
+
 class BoardGridAdapter private constructor(
   private val layoutInflater: LayoutInflater,
-  private val n: Int,
+  private val nCols: Int,
   private val buttonStates: List<LetterButtonState>,
-  private val wordPositions: List<List<Pair<Int, Int>>>
+  private val wordPositions: MutableList<List<Pair<Int, Int>>>,
+  private val onWordSelected: onWordSelectedCallback,
+  private val onLastWordSelectedCallback: onLastWordSelectedCallback
 ) : BaseAdapter() {
 
-  constructor(layoutInflater: LayoutInflater, dto: BoardAdapterDto) : this(
+  constructor(
+    layoutInflater: LayoutInflater,
+    dto: BoardAdapterDto,
+    onWordSelected: onWordSelectedCallback,
+    onLastWordSelectedCallback: onLastWordSelectedCallback
+  ) : this(
     layoutInflater,
-    dto.n,
+    dto.nCols,
     dto.buttonStates,
-    dto.wordPositions
+    dto.wordPositions.toMutableList(),
+    onWordSelected,
+    onLastWordSelectedCallback
   )
   constructor(
     layoutInflater: LayoutInflater,
     letters: List<String>,
-    n: Int,
-    wordPositions: List<List<Pair<Int, Int>>>
+    nCols: Int,
+    wordPositions: List<List<Pair<Int, Int>>>,
+    onWordSelected: onWordSelectedCallback,
+    onLastWordSelectedCallback: onLastWordSelectedCallback
   ) : this(
     layoutInflater,
-    n,
+    nCols,
     letters.withIndex().map { (idx, letter) -> LetterButtonState(position = idx, value = letter) },
-    wordPositions
+    wordPositions.toMutableList(),
+    onWordSelected,
+    onLastWordSelectedCallback
   )
 
-  private var currentWord = linkedSetOf<LetterButton>()
+  private var currentWord = mutableListOf<LetterButton>()
 
   override fun getCount() = buttonStates.size
 
@@ -57,7 +73,7 @@ class BoardGridAdapter private constructor(
   }
 
   fun toDto(): BoardAdapterDto = BoardAdapterDto(
-    n,
+    nCols,
     buttonStates,
     wordPositions
   )
@@ -73,7 +89,7 @@ class BoardGridAdapter private constructor(
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           Log.d("touch", "letter $position")
-          currentWord = linkedSetOf(letter)
+          currentWord = mutableListOf(letter)
           return@OnTouchListener v.performClick()
         }
         MotionEvent.ACTION_MOVE -> {
@@ -100,27 +116,35 @@ class BoardGridAdapter private constructor(
         MotionEvent.ACTION_UP -> {
           Log.d("up", "letter $position")
           val isValid = isCurrentWordValid()
-          if (isValid) {
-            val color = getRandomColor()
-            currentWord.forEach {
-              it.setBackgroundColor(color)
-              it.isActivated = false
 
-              // TODO: Is there a way for LetterButton and LetterButtonState share same state
-              it.state.apply {
-                this.color = color
-                isActive = false
-              }
-            }
-          } else {
+          if (!isValid) {
             Toast.makeText(v.context, "Слово ${getCurrentWord()} не загадывали", Toast.LENGTH_LONG).show()
             currentWord.forEach { it.performClick() }
-            currentWord = linkedSetOf()
+            currentWord = mutableListOf()
             return@OnTouchListener true
           }
+
+          val color = getRandomColor()
+          currentWord.forEach {
+            it.setBackgroundColor(color)
+            it.isActivated = false
+
+            // TODO: Is there a way for LetterButton and LetterButtonState share same state
+            it.state.apply {
+              this.color = color
+              isActive = false
+            }
+          }
+
+          onWordSelected(getCurrentWord())
+          Log.d("BoardGridAdapter", "Remove: ${wordPositions.remove(toPositions(currentWord))}")
+          Log.d("BoardGridAdapter", "Remaining: ${wordPositions.size}")
+          if (wordPositions.isEmpty()) onLastWordSelectedCallback()
+
+          return@OnTouchListener true
         }
+        else -> return@OnTouchListener false
       }
-      return@OnTouchListener false
     }
   }
 
@@ -129,15 +153,16 @@ class BoardGridAdapter private constructor(
 
     return i == lastPosition - 1 ||
       i == lastPosition + 1 ||
-      i == lastPosition - n ||
-      i == lastPosition + n
+      i == lastPosition - nCols ||
+      i == lastPosition + nCols
   }
 
-  private fun getCurrentWord() = currentWord.fold("") { acc, it -> acc + it.text }
+  private fun getCurrentWord() = currentWord.joinToString("") { it.text }
 
-  private fun isCurrentWordValid(): Boolean {
-    return currentWord.map { (it.position / n) to (it.position % n) } in wordPositions
-  }
+  private fun isCurrentWordValid(): Boolean = toPositions(currentWord) in wordPositions
+
+  private fun toPositions(word: List<LetterButton>): List<Pair<Int, Int>> =
+    word.map { (it.position / nCols) to (it.position % nCols) }
 
   private fun getRandomColor(): Int {
     return Color.HSVToColor(
