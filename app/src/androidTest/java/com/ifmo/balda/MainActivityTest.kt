@@ -22,7 +22,8 @@ import com.ifmo.balda.activity.GameActivity
 import com.ifmo.balda.activity.HelpScreenActivity
 import com.ifmo.balda.activity.MainActivity
 import com.ifmo.balda.activity.StatScreenActivity
-import com.ifmo.balda.model.Topic
+import com.ifmo.balda.activity.currentLanguage
+import com.ifmo.balda.model.data.dictionaries
 import org.hamcrest.CoreMatchers.instanceOf
 import org.junit.After
 import org.junit.Before
@@ -89,12 +90,13 @@ class MainActivityTest {
       .check(matches(isDisplayed()))
       .check(matches(isClickable()))
 
-    for ((idx, topic) in Topic.values().withIndex()) {
+    val topics = context.dictionaries.topics(currentLanguage(context.prefs))
+    for ((idx, topic) in topics.withIndex()) {
       topicSelector.perform(click())
       onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
         .atPosition(idx)
         .perform(click())
-      topicSelector.check(matches(withSpinnerText(topic.resourceId)))
+      topicSelector.check(matches(withSpinnerText(topic.name(context))))
     }
   }
 
@@ -132,7 +134,8 @@ class MainActivityTest {
   fun testTopicPersists() {
     activityRule.scenario.close() // For this test we will manage activities manually
 
-    for ((idx, topic) in Topic.values().withIndex()) {
+    val topics = context.dictionaries.topics(currentLanguage(context.prefs))
+    for ((idx, topic) in topics.withIndex()) {
       launch().use {
         onView(withId(R.id.topicSelector)).perform(click())
         onData(instanceOf(MainActivity.TopicSelectorItem::class.java))
@@ -142,7 +145,7 @@ class MainActivityTest {
 
       launch().use {
         onView(withId(R.id.topicSelector))
-          .check(matches(withSpinnerText(topic.resourceId)))
+          .check(matches(withSpinnerText(topic.name(context))))
       }
     }
   }

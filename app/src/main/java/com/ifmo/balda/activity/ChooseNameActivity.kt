@@ -74,7 +74,7 @@ class ChooseNameActivity : AppCompatActivity() {
             GameMode.MULTIPLAYER -> player2NameEdit.text.toString()
           }
         )
-        putExtra(IntentExtraNames.GAME_MODE, gameMode.toString())
+        fillIn(intent, 0) // mode, difficulty, and topic are already in extras
       }
       saveNames(prefs, player1NameEdit, player2NameEdit)
       startActivity(intent)

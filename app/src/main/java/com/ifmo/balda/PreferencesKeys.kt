@@ -9,4 +9,5 @@ object PreferencesKeys {
   const val multiPlayer2PlayerName = "multiPlayer2PlayerName"
   const val singlePlayerSavedGame = "singlePlayerSavedGame"
   const val multiPlayerSavedGame = "multiPlayerSavedGame"
+  const val language = "language"
 }

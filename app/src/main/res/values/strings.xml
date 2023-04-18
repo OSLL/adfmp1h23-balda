@@ -1,8 +1,11 @@
 <resources>
-  <string name="app_name">adfmp1h23-balda</string>
+  <string name="app_name" translatable="false">adfmp1h23-balda</string>
+  <string name="todo" translatable="false">TODO</string>
+  <string name="lang_ru" translatable="false">ru</string>
+  <string name="lang_en" translatable="false">en</string>
+  <string name="lang">@string/lang_ru</string>
+
   <string name="app_title">БалНет</string>
-  <string name="todo">TODO</string>
-  <string name="lang_ru">RU</string>
   <string name="_1player">1 Игрок</string>
   <string name="_2players">2 Игрока</string>
   <string name="difficulty_column">Сложность:</string>
@@ -12,11 +15,13 @@
   <string name="hard">Сложно</string>
   <string name="topic_column">Тематика:</string>
   <string name="topic_help">Область, из которой брать слова. "Общая" тематика — общеупотребимые слова.</string>
+
   <string name="game_description">Вся суть одним предложением: выделяйте загаданные нами слова в сетке из букв, а чем длиннее слово, тем больше очков!\n\n
 Эта игра в жанре филворда даёт возможность как одиночной игры против бота, так и игры двух людей на одном устройстве.\n\n
 Игру можно поставить на паузу, а можно и вовсе оставить недоигранной: даже если после этого вы поиграете с кем-то ещё, приложение напомнит вам о недоигранном матче когда оппонент вернётся!\n\n
 Название игры пришло от Балды :)
   </string>
+
   <string name="play">Играть</string>
   <string name="player">Игрок</string>
   <string name="playerName">Имя игрока</string>
@@ -24,6 +29,7 @@
   <string name="player1Name">Имя игрока 1</string>
   <string name="player2">Игрок 2</string>
   <string name="player2Name">Имя игрока 2</string>
+
   <string name="score">Счёт</string>
   <string name="time">Время</string>
   <string name="pause">Пауза</string>
@@ -31,19 +37,18 @@
   <string name="menu">В меню</string>
   <string name="pass">Пропуск</string>
   <string name="tip">Помощь</string>
-  <string name="bot">Bot</string>
+  <string name="bot">Бот 🤖</string>
   <string name="yes">Да</string>
   <string name="no">Нет</string>
   <string name="resumeSavedGamePrompt">У вас есть незавершённая игра в этом режиме. Хотите продолжить?</string>
 
-  <!-- Not an array because we need to distinguish one value from another -->
-  <string name="topic_common">Общая</string>
-  <string name="topic_all">Все</string>
-  <string name="topic_programming">Программирование</string>
-  <string name="topic_dota2">Dota 2</string>
   <string name="resume">Продолжить</string>
   <string name="time_remaining">Осталось времени:</string>
   <string name="current_player">Текущий игрок:</string>
     <string name="turn_column">Ход:</string>
 
+  <string name="topic_common">Общая</string>
+  <string name="topic_programming">Программирование</string>
+  <string name="topic_dota2">Дота 2</string>
+  <string name="topic_all">Все</string>
 </resources>

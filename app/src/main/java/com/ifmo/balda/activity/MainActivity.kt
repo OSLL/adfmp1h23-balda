@@ -6,7 +6,9 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CompoundButton
@@ -17,16 +19,24 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.edit
+import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.DialogFragment
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
+import com.ifmo.balda.model.data.Lang
+import com.ifmo.balda.model.data.LargeIO
+import com.ifmo.balda.model.data.Topic
+import com.ifmo.balda.model.data.dictionaries
 import com.ifmo.balda.model.Difficulty
 import com.ifmo.balda.model.GameMode
-import com.ifmo.balda.model.Topic
 import com.ifmo.balda.setOnClickActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
   companion object {
@@ -38,11 +48,24 @@ class MainActivity : AppCompatActivity() {
 
     private val difficultyToButtonId = mapOf(*buttonIdToDifficulty.map { (fst, snd) -> Pair(snd, fst) }.toTypedArray())
   }
+
+  private lateinit var coroutineScope: CoroutineScope
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
+    selectLanguage(currentLanguage(prefs), prefs) // reset ui & persist
+
     setContentView(R.layout.activity_main)
 
-    val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
+    coroutineScope = CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+
+    findViewById<Button>(R.id.langButton).setOnClickListener {
+      val languages = Lang.list + Lang.list // not to run out of bounds
+      val current = currentLanguage(prefs).code
+      val next = languages[1 + languages.indexOfFirst { it.code == current }]
+      selectLanguage(next, prefs)
+    }
 
     findViewById<ImageButton>(R.id.statButton).setOnClickActivity(this, StatScreenActivity::class)
     findViewById<ImageButton>(R.id.helpButton).setOnClickActivity(this, HelpScreenActivity::class)
@@ -60,35 +83,46 @@ class MainActivity : AppCompatActivity() {
 
   override fun onPause() {
     super.onPause()
-    val checkedDifficultyButton = findViewById<RadioGroup>(R.id.difficultyButtonsGroup).checkedRadioButtonId
-    val selectedDifficulty = buttonIdToDifficulty[checkedDifficultyButton]!!
-
-    val selectedTopicItem = findViewById<Spinner>(R.id.topicSelector).selectedItem as TopicSelectorItem
-    val selectedTopic = Topic.fromResourceId(selectedTopicItem.resourceId).getOrThrow()
-
-    getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).edit {
-      putString(PreferencesKeys.difficulty, selectedDifficulty.name)
-      putString(PreferencesKeys.topic, selectedTopic.name)
-    }
+    coroutineScope.cancel()
   }
 
   private fun initTopicBlock(prefs: SharedPreferences) {
     val selector = findViewById<Spinner>(R.id.topicSelector)
-    val values = Topic.values()
 
-    setOnClickTooltip(findViewById<ImageButton>(R.id.topicHelpButton), R.string.topic_help)
-    selector.adapter = ArrayAdapter(
-      this,
-      android.R.layout.simple_list_item_1,
-      values.map {
-        val rId = it.resourceId
-        val text = resources.getString(rId)
-        TopicSelectorItem(rId, text)
+    coroutineScope.launch {
+      val topics = sortedTopics(prefs)
+
+      runOnUiThread {
+        setOnClickTooltip(findViewById<ImageButton>(R.id.topicHelpButton), R.string.topic_help)
+
+        selector.adapter = ArrayAdapter(
+          this@MainActivity,
+          android.R.layout.simple_list_item_1,
+          topics.map {
+            TopicSelectorItem(it.name(this@MainActivity))
+          }
+        )
+
+        val topicToSet = currentTopic(prefs).takeIf { it in topics.toSet() } ?: Topic.Common
+
+        selector.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+          override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+            coroutineScope.launch {
+              selectTopic(topics[position], prefs)
+            }
+          }
+
+          override fun onNothingSelected(p0: AdapterView<*>?) {
+            val topic = currentTopic(prefs).takeIf { it in topics.toSet() } ?: Topic.Common
+            coroutineScope.launch {
+              selectTopic(topic, prefs)
+            }
+          }
+        }
+
+        selector.setSelection(topics.indexOf(topicToSet))
       }
-    )
-
-    val savedTopic = Topic.valueOf(prefs.getString(PreferencesKeys.topic, Topic.ALL.name)!!)
-    selector.setSelection(values.indexOfFirst { it.resourceId == savedTopic.resourceId })
+    }
   }
 
   private fun initDifficultyBlock(prefs: SharedPreferences) {
@@ -98,6 +132,9 @@ class MainActivity : AppCompatActivity() {
       if (isChecked) {
         findViewById<TextView>(R.id.selectedDifficulty).text = buttonView.text
       }
+      if (isChecked) {
+        selectDifficulty(buttonIdToDifficulty[buttonView.id]!!, prefs)
+      }
     }
 
     setOnClickTooltip(findViewById<ImageButton>(R.id.difficultyHelpButton), R.string.difficulty_help)
@@ -106,8 +143,9 @@ class MainActivity : AppCompatActivity() {
       findViewById<RadioButton>(key).setOnCheckedChangeListener(difficultyChangeHandler)
     }
 
-    val selectedDifficulty = Difficulty.valueOf(prefs.getString(PreferencesKeys.difficulty, Difficulty.EASY.name)!!)
-    findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(difficultyToButtonId[selectedDifficulty]!!)
+    val difficulty = currentDifficulty(prefs)
+    findViewById<RadioGroup>(R.id.difficultyButtonsGroup)
+      .check(difficultyToButtonId[difficulty]!!)
   }
 
   private fun getStartGameOnClickListener(prefs: SharedPreferences, mode: GameMode) = View.OnClickListener {
@@ -119,27 +157,88 @@ class MainActivity : AppCompatActivity() {
 
     if (savedGame != null) {
       ResumeSavedGameDialogFragment(
-        onPositive = { startActivity(getGameActivityIntent(mode, savedGame)) },
-        onNegative = { startActivity(getChooseNameActivityIntent(mode)) }
+        onPositive = { startActivity(getGameActivityIntent(mode, savedGame, currentDifficulty(prefs), currentTopic(prefs))) },
+        onNegative = { startActivity(getChooseNameActivityIntent(mode, currentDifficulty(prefs), currentTopic(prefs))) }
       )
         .show(supportFragmentManager, "Start game dialog")
     } else {
-      startActivity(getChooseNameActivityIntent(mode))
+      startActivity(getChooseNameActivityIntent(mode, currentDifficulty(prefs), currentTopic(prefs)))
     }
   }
 
-  private fun getChooseNameActivityIntent(mode: GameMode) = Intent(this, ChooseNameActivity::class.java)
-    .apply { putExtra(IntentExtraNames.GAME_MODE, mode.name) }
+  private fun getChooseNameActivityIntent(
+    mode: GameMode,
+    difficulty: Difficulty,
+    topic: Topic,
+  ) = Intent(this, ChooseNameActivity::class.java)
+    .apply {
+      putExtra(IntentExtraNames.GAME_MODE, mode.name)
+      putExtra(IntentExtraNames.TOPIC, topic.name(this@MainActivity))
+      putExtra(IntentExtraNames.DIFFICULTY, difficulty.name)
+    }
 
-  private fun getGameActivityIntent(mode: GameMode, savedGame: String) = Intent(
+  private fun getGameActivityIntent(
+    mode: GameMode,
+    savedGame: String,
+    difficulty: Difficulty,
+    topic: Topic
+  ) = Intent(
     this,
     GameActivity::class.java
   ).apply {
     putExtra(IntentExtraNames.GAME_MODE, mode.name)
+    putExtra(IntentExtraNames.TOPIC, topic.name(this@MainActivity))
+    putExtra(IntentExtraNames.DIFFICULTY, difficulty.name)
     putExtra(IntentExtraNames.SAVED_GAME, savedGame)
   }
 
-  internal class TopicSelectorItem(val resourceId: Int, val text: String) {
+  private fun selectLanguage(lang: Lang, prefs: SharedPreferences) {
+    prefs.edit {
+      putString(PreferencesKeys.language, lang.code)
+    }
+    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang.code))
+  }
+
+  private fun currentDifficulty(prefs: SharedPreferences): Difficulty {
+    return prefs.getString(PreferencesKeys.difficulty, null)
+      ?.let { Difficulty.valueOf(it) }
+      ?: Difficulty.EASY
+  }
+
+  private fun selectDifficulty(difficulty: Difficulty, prefs: SharedPreferences) {
+    findViewById<RadioGroup>(R.id.difficultyButtonsGroup).check(difficultyToButtonId[difficulty]!!)
+    prefs.edit {
+      putString(PreferencesKeys.difficulty, difficulty.name)
+    }
+    Log.d("difficulty", "selected difficulty ${difficulty.name}")
+  }
+
+  private fun currentTopic(prefs: SharedPreferences): Topic {
+    return prefs.getString(PreferencesKeys.topic, null)
+      ?.let { Topic.byName(it, this) }
+      ?: Topic.Common
+  }
+
+  @LargeIO
+  private fun selectTopic(topic: Topic, prefs: SharedPreferences) {
+    val selector = findViewById<Spinner>(R.id.topicSelector)
+    val topics = sortedTopics(prefs)
+    runOnUiThread {
+      selector.setSelection(topics.indexOfFirst { it == topic })
+      prefs.edit {
+        putString(PreferencesKeys.topic, topic.name(this@MainActivity))
+      }
+      Log.d("topic", "selected topic ${topic.name(this)}")
+    }
+  }
+
+  @LargeIO
+  private fun sortedTopics(prefs: SharedPreferences): List<Topic> {
+    return dictionaries.topics(currentLanguage(prefs))
+      .sortedBy { if (it == Topic.Common) "" else it.name(this) }
+  }
+
+  internal class TopicSelectorItem(val text: String) {
     override fun toString(): String = text
   }
 
@@ -163,4 +262,10 @@ private fun Context.setOnClickTooltip(view: View, tooltipTextId: Int) {
   view.setOnClickListener {
     it.performLongClick()
   }
+}
+
+fun currentLanguage(prefs: SharedPreferences): Lang {
+  return AppCompatDelegate.getApplicationLocales()[0]?.language?.let { Lang.byCode(it) }
+    ?: prefs.getString(PreferencesKeys.language, null)?.let { Lang.byCode(it) }
+    ?: Lang.default
 }
