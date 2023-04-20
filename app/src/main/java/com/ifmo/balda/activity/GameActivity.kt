@@ -16,11 +16,8 @@ import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
 import com.ifmo.balda.adapter.BoardGridAdapter
 import com.ifmo.balda.db
-import com.ifmo.balda.model.data.LargeIO
-import com.ifmo.balda.model.data.dictionaries
-import com.ifmo.balda.model.BoardGenerator
-import com.ifmo.balda.model.DictionaryGenerator
 import com.ifmo.balda.model.Difficulty
+import com.ifmo.balda.model.GameFieldState
 import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.PlayerNumber
 import com.ifmo.balda.model.data.Topic
@@ -30,22 +27,15 @@ import com.ifmo.balda.model.entity.Stat
 import com.ifmo.balda.view.InterceptingGridView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.properties.Delegates
-import kotlin.random.Random
-
-// Char is the letter at the position, List<Coordinates> is the position of the word it belongs to
-private typealias Coordinates = Pair<Int, Int>
-private typealias FilledBoard = Map<Coordinates, Pair<Char, List<Coordinates>>>
 
 class GameActivity : AppCompatActivity() {
   private val n = 8 // Depends on difficulty?
-  private val coroutineScope = CoroutineScope(Dispatchers.Default)
+  private var fieldState by Delegates.notNull<GameFieldState>()
 
   // WARNING: this property are safe to use ONLY in [onCreate] and after that
   private val gameMode
@@ -81,16 +71,27 @@ class GameActivity : AppCompatActivity() {
       }
       startActivity(intent)
     }
-
     findViewById<Button>(R.id.pass_button).setOnClickListener { /* TODO: Confirmation */ changeCurrentPlayer() }
+    findViewById<Button>(R.id.tip_button).setOnClickListener {
+      val hintShown = fieldState.hint()
+
+      if (hintShown) {
+        val viewId = when (currentPlayer) {
+          PlayerNumber.FIRST -> R.id.p1_score
+          PlayerNumber.SECOND -> R.id.p2_score
+        }
+        val view = findViewById<TextView>(viewId)
+        view.text = (view.text.toString().toInt() - 1).toString()
+      }
+    }
   }
 
   override fun onPause() {
     super.onPause()
     val board = findViewById<InterceptingGridView>(R.id.board)
-    coroutineScope.cancel()
+    fieldState.destroy()
 
-    if (board.adapter != null) {
+    if (fieldState.published) {
       getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE).edit {
         val key = when (gameMode) {
           GameMode.SINGLE_PLAYER -> PreferencesKeys.singlePlayerSavedGame
@@ -109,15 +110,14 @@ class GameActivity : AppCompatActivity() {
     findViewById<TextView>(R.id.p2_name).text = player2.name
     findViewById<TextView>(R.id.p1_score).text = player1.score.toString()
     findViewById<TextView>(R.id.p2_score).text = player2.score.toString()
-    findViewById<InterceptingGridView>(R.id.board).apply {
-      numColumns = board.nCols
-      adapter = BoardGridAdapter(
-        layoutInflater = layoutInflater,
-        dto = board,
-        onWordSelected = { onWordSelected(it) },
-        onLastWordSelectedCallback = { onGameEnded() }
-      )
-    }
+    fieldState = GameFieldState(
+      context = this@GameActivity,
+      layoutInflater = layoutInflater,
+      view = findViewById(R.id.board),
+      dto = board,
+      onWordSelectedCallback = { word, _ -> onWordSelected(word) },
+      onGameEnded = { onGameEnded() }
+    )
     this@GameActivity.currentPlayer = currentPlayer
 
     findViewById<TextView>(R.id.current_player).text = when (currentPlayer) {
@@ -136,88 +136,22 @@ class GameActivity : AppCompatActivity() {
     currentPlayer = PlayerNumber.FIRST
     findViewById<TextView>(R.id.current_player).text = player1Name
 
-    coroutineScope.launch {
-      val board = getBoard()
-      runOnUiThread { setUpBoardGrid(board) }
-    }
-  }
+    val topic = intent.getStringExtra(IntentExtraNames.TOPIC)!!.let { Topic.byName(it, this) }
 
-  private fun setUpBoardGrid(board: FilledBoard) {
-    val boardLetters = fillBoardWithLetters(board)
-    val gridView = findViewById<InterceptingGridView>(R.id.board)
-    gridView.numColumns = n
-    val boardGridAdapter = BoardGridAdapter(
+    fieldState = GameFieldState(
+      context = this,
       layoutInflater = layoutInflater,
-      letters = boardLetters,
-      nCols = n,
-      wordPositions = board.values.map { it.second }.toSet().toList(),
-      onWordSelected = { onWordSelected(it) },
-      onLastWordSelectedCallback = { onGameEnded() }
+      difficulty = intent.getStringExtra(IntentExtraNames.DIFFICULTY)!!.let { Difficulty.valueOf(it) },
+      topic = topic,
+      view = findViewById(R.id.board),
+      size = n,
+      onWordSelectedCallback = { word, _ -> onWordSelected(word) },
+      onGameEnded = { onGameEnded() }
     )
-    gridView.adapter = boardGridAdapter
   }
 
   private fun toMainMenu() {
     NavUtils.navigateUpTo(this, Intent(this, MainActivity::class.java))
-  }
-
-  private fun fillBoardWithLetters(board: FilledBoard): List<String> = buildList {
-    for (i in 0 until n) {
-      for (j in 0 until n) {
-        add(board[i to j]!!.first.toString())
-      }
-    }
-  }
-
-  // todo: save state correctly
-  @LargeIO
-  private suspend fun getBoard(): FilledBoard = Random.nextInt().let { seed ->
-    Log.d("board", "seed is $seed")
-    val random = Random(seed)
-
-    val board = BoardGenerator(random).generate(n, n)
-    val trajectory = board.getCluster(0 to 0)
-
-    val len2words = withContext(Dispatchers.IO) {
-      val topicName = intent.getStringExtra(IntentExtraNames.TOPIC)!!
-      val difficulty = intent.getStringExtra(IntentExtraNames.DIFFICULTY)!!.let { Difficulty.valueOf(it) }
-      val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
-      val topic = Topic.byName(topicName, this@GameActivity)
-
-      val dictionary = dictionaries.loadDictionary(currentLanguage(prefs), topic, this@GameActivity)
-
-      val frequencies = dictionary.values.map { it }.toSortedSet().toList()
-      val difficultEnd = frequencies[frequencies.size / 3]
-      val mediumEnd = frequencies[frequencies.size * 2 / 3]
-
-      dictionary
-        .filterValues {
-          it in when (difficulty) {
-            Difficulty.EASY -> mediumEnd until frequencies.last()
-            Difficulty.MEDIUM -> difficultEnd until mediumEnd
-            Difficulty.HARD -> 0 .. difficultEnd
-          }
-        }
-        .keys
-        .groupBy { it.length }
-    }
-    val dict = DictionaryGenerator(random).generate(trajectory.size, len2words).shuffled(random)
-    Log.d("board", "dict is ${dict.toList()}")
-
-    val result = buildMap {
-      val restOfTrajectory = trajectory.toMutableList()
-      for (word in dict.asReversed()) {
-        val wordTraj = restOfTrajectory.takeLast(word.length)
-        repeat(word.length) { restOfTrajectory.removeLast() }
-
-        this += wordTraj.zip(word.toList().map { it.uppercaseChar() }).toMap()
-          .mapValues { it.value to wordTraj }
-      }
-    }
-
-    Log.d("board", "word positions are ${result.values.map { it.second }}")
-
-    result
   }
 
   private fun dtoFromAdapter(adapter: BoardGridAdapter) = GameDto(
@@ -251,8 +185,6 @@ class GameActivity : AppCompatActivity() {
       PlayerNumber.FIRST -> findViewById(R.id.p1_score)
       PlayerNumber.SECOND -> findViewById(R.id.p2_score)
     }
-
-    // TODO: Confirmation dialog?
 
     scoreView.text = (scoreView.text.toString().toInt() + word.length).toString()
     changeCurrentPlayer()

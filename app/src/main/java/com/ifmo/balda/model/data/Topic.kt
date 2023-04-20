@@ -3,7 +3,6 @@ package com.ifmo.balda.model.data
 import android.content.Context
 import com.ifmo.balda.R
 
-
 sealed class Topic {
   companion object {
     fun byName(name: String, ctx: Context): Topic {
