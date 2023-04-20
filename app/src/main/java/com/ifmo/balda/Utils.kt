@@ -21,3 +21,5 @@ fun View.setOnClickActivity(
 }
 
 fun unreachable(): Nothing = error("unreachable")
+
+typealias Coordinates = Pair<Int, Int>

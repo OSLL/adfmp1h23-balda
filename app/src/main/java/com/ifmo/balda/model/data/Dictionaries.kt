@@ -4,9 +4,8 @@ import android.content.Context
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-
 class Dictionaries private constructor(
-  private val dictionaries: Map<Lang, Map<Topic, Path>>,
+  private val dictionaries: Map<Lang, Map<Topic, Path>>
 ) {
   companion object {
     private const val dictDir = "dict"
@@ -25,17 +24,22 @@ class Dictionaries private constructor(
         .mapNotNull { thematicDictRegex.matchEntire(it) }
         .groupBy(keySelector = { Lang(it.groupValues[1]) })
         .mapValues { (_, matches) ->
-          matches.associateBy(keySelector = { Topic.Theme(it.groupValues[2]) }, valueTransform = { Path(dictDir, it.value) })
+          matches.associateBy(
+            keySelector = { Topic.Theme(it.groupValues[2]) },
+            valueTransform = { Path(dictDir, it.value) }
+          )
         }
 
-      return Dictionaries(buildMap {
-        for (lang in commonDictionaries.keys + thematicDictionaries.keys) {
-          this[lang] = buildMap {
-            commonDictionaries[lang]?.let { commonPath -> put(Topic.Common, commonPath) }
-            thematicDictionaries[lang]?.let { thematicPaths -> putAll(thematicPaths) }
+      return Dictionaries(
+        buildMap {
+          for (lang in commonDictionaries.keys + thematicDictionaries.keys) {
+            this[lang] = buildMap {
+              commonDictionaries[lang]?.let { commonPath -> put(Topic.Common, commonPath) }
+              thematicDictionaries[lang]?.let { thematicPaths -> putAll(thematicPaths) }
+            }
           }
         }
-      })
+      )
     }
   }
 
@@ -64,7 +68,7 @@ class Dictionaries private constructor(
 }
 
 @Volatile
-private var dictionaries_ : Dictionaries? = null
+private var dictionaries_: Dictionaries? = null
 
 val Context.dictionaries: Dictionaries
   @LargeIO

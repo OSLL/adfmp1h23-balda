@@ -11,27 +11,31 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatToggleButton
+import com.ifmo.balda.Coordinates
 import com.ifmo.balda.R
 import com.ifmo.balda.model.dto.BoardAdapterDto
 import kotlin.properties.Delegates
 
-private typealias onWordSelectedCallback = (word: String) -> Unit
-private typealias onLastWordSelectedCallback = () -> Unit
+typealias OnWordSelectedCallback = (word: String, positions: List<Coordinates>) -> Unit
+typealias OnLastWordSelectedCallback = () -> Unit
 
 class BoardGridAdapter private constructor(
   private val layoutInflater: LayoutInflater,
   private val nCols: Int,
   private val buttonStates: List<LetterButtonState>,
-  private val wordPositions: MutableList<List<Pair<Int, Int>>>,
-  private val onWordSelected: onWordSelectedCallback,
-  private val onLastWordSelectedCallback: onLastWordSelectedCallback
+  private val wordPositions: MutableList<List<Coordinates>>,
+  private val onWordSelected: OnWordSelectedCallback,
+  private val onLastWordSelectedCallback: OnLastWordSelectedCallback
 ) : BaseAdapter() {
+  private var currentWord = mutableListOf<LetterButton>()
+  val positions // outside positions are immutable
+    get(): List<List<Coordinates>> = wordPositions
 
   constructor(
     layoutInflater: LayoutInflater,
     dto: BoardAdapterDto,
-    onWordSelected: onWordSelectedCallback,
-    onLastWordSelectedCallback: onLastWordSelectedCallback
+    onWordSelected: OnWordSelectedCallback,
+    onLastWordSelectedCallback: OnLastWordSelectedCallback
   ) : this(
     layoutInflater,
     dto.nCols,
@@ -40,13 +44,14 @@ class BoardGridAdapter private constructor(
     onWordSelected,
     onLastWordSelectedCallback
   )
+
   constructor(
     layoutInflater: LayoutInflater,
     letters: List<String>,
     nCols: Int,
     wordPositions: List<List<Pair<Int, Int>>>,
-    onWordSelected: onWordSelectedCallback,
-    onLastWordSelectedCallback: onLastWordSelectedCallback
+    onWordSelected: OnWordSelectedCallback,
+    onLastWordSelectedCallback: OnLastWordSelectedCallback
   ) : this(
     layoutInflater,
     nCols,
@@ -55,8 +60,6 @@ class BoardGridAdapter private constructor(
     onWordSelected,
     onLastWordSelectedCallback
   )
-
-  private var currentWord = mutableListOf<LetterButton>()
 
   override fun getCount() = buttonStates.size
 
@@ -136,9 +139,9 @@ class BoardGridAdapter private constructor(
             }
           }
 
-          onWordSelected(getCurrentWord())
-          Log.d("BoardGridAdapter", "Remove: ${wordPositions.remove(toPositions(currentWord))}")
-          Log.d("BoardGridAdapter", "Remaining: ${wordPositions.size}")
+          val positions = toPositions(currentWord)
+          onWordSelected(getCurrentWord(), positions)
+          wordPositions.remove(positions)
           if (wordPositions.isEmpty()) onLastWordSelectedCallback()
 
           return@OnTouchListener true

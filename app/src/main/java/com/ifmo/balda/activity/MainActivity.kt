@@ -27,12 +27,12 @@ import androidx.fragment.app.DialogFragment
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
+import com.ifmo.balda.model.Difficulty
+import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.data.Lang
 import com.ifmo.balda.model.data.LargeIO
 import com.ifmo.balda.model.data.Topic
 import com.ifmo.balda.model.data.dictionaries
-import com.ifmo.balda.model.Difficulty
-import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.setOnClickActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -166,7 +166,11 @@ class MainActivity : AppCompatActivity() {
 
     if (savedGame != null) {
       ResumeSavedGameDialogFragment(
-        onPositive = { startActivity(getGameActivityIntent(mode, savedGame, currentDifficulty(prefs), currentTopic(prefs))) },
+        onPositive = {
+          startActivity(
+            getGameActivityIntent(mode, savedGame, currentDifficulty(prefs), currentTopic(prefs))
+          )
+        },
         onNegative = { startActivity(getChooseNameActivityIntent(mode, currentDifficulty(prefs), currentTopic(prefs))) }
       )
         .show(supportFragmentManager, "Start game dialog")
@@ -178,7 +182,7 @@ class MainActivity : AppCompatActivity() {
   private fun getChooseNameActivityIntent(
     mode: GameMode,
     difficulty: Difficulty,
-    topic: Topic,
+    topic: Topic
   ) = Intent(this, ChooseNameActivity::class.java)
     .apply {
       putExtra(IntentExtraNames.GAME_MODE, mode.name)

@@ -14,9 +14,11 @@ abstract class AppDatabase : RoomDatabase() {
 }
 
 private fun initDb(ctx: Context): AppDatabase = Room.databaseBuilder(ctx, AppDatabase::class.java, "balda.db")
-  .addMigrations(Migration(1, 2) {
-    it.query("DROP TABLE Word")
-  })
+  .addMigrations(
+    Migration(1, 2) {
+      it.query("DROP TABLE Word")
+    }
+  )
   .build()
 
 @Volatile
