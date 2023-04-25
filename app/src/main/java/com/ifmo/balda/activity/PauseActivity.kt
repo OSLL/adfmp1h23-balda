@@ -15,23 +15,29 @@ class PauseActivity : AppCompatActivity() {
     val (currentPlayer, timeRemaining) = with(this.intent) {
       val currentPlayer = getStringExtra(IntentExtraNames.CURRENT_PLAYER)
         ?: error("Missing required property '${IntentExtraNames.CURRENT_PLAYER}'")
-      val timeRemaining = getIntExtra(IntentExtraNames.TIME_REMAINING, -1)
-      if (timeRemaining == -1) error("Missing required property '${IntentExtraNames.TIME_REMAINING}'")
+      val timeRemaining = getLongExtra(IntentExtraNames.TIME_REMAINING, -1)
+      if (timeRemaining == -1L) error("Missing required property '${IntentExtraNames.TIME_REMAINING}'")
 
       Pair(currentPlayer, timeRemaining)
     }
 
     findViewById<TextView>(R.id.currentPlayerName).text = currentPlayer
-    findViewById<TextView>(R.id.timeRemaining).text = timeStringFromSeconds(timeRemaining)
+    findViewById<TextView>(R.id.timeRemaining).text = timeStringFromMillis(timeRemaining)
     findViewById<Button>(R.id.resumeButton).setOnClickListener { finish() }
   }
 
-  private fun timeStringFromSeconds(seconds: Int): String {
+  /**
+   * Assuming there are less than 10 minutes
+   */
+  private fun timeStringFromMillis(millis: Long): String {
+    var seconds = (millis / 1000)
     val minutes = seconds / 60
-    val secondsRemaining = seconds - (minutes * 60)
-    val minutesString = if (minutes < 10) "0$minutes" else "$minutes"
-    val secondsString = if (secondsRemaining < 10) "0$secondsRemaining" else "$secondsRemaining"
+    seconds %= 60
 
-    return "$minutesString:$secondsString"
+    return if (seconds < 10) {
+      "$minutes:0$seconds"
+    } else {
+      "$minutes:$seconds"
+    }
   }
 }

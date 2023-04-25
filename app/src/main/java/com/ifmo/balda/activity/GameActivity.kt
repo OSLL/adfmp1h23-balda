@@ -3,7 +3,9 @@ package com.ifmo.balda.activity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -31,11 +33,16 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
+
 
 class GameActivity : AppCompatActivity() {
   private val n = 8 // Depends on difficulty?
   private var fieldState by Delegates.notNull<GameFieldState>()
+
+  private lateinit var timer: CountDownTimer
+  private var timeRemaining: Long? = null
 
   // WARNING: this property are safe to use ONLY in [onCreate] and after that
   private val gameMode
@@ -59,6 +66,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     findViewById<Button>(R.id.pause_button).setOnClickListener {
+      timer.cancel()
       val intent = Intent(this, PauseActivity::class.java).apply {
         putExtra(
           IntentExtraNames.CURRENT_PLAYER,
@@ -67,11 +75,16 @@ class GameActivity : AppCompatActivity() {
             PlayerNumber.SECOND -> findViewById<TextView>(R.id.p2_name).text.toString()
           }
         )
-        putExtra(IntentExtraNames.TIME_REMAINING, 0)
+        putExtra(IntentExtraNames.TIME_REMAINING, timeRemaining)
       }
       startActivity(intent)
     }
-    findViewById<Button>(R.id.pass_button).setOnClickListener { /* TODO: Confirmation */ changeCurrentPlayer() }
+    findViewById<Button>(R.id.pass_button).setOnClickListener { /* TODO: Confirmation */
+      timer.cancel()
+      changeCurrentPlayer()
+      timeRemaining = null
+      resumeTimer()
+    }
     findViewById<Button>(R.id.tip_button).setOnClickListener {
       val hintShown = fieldState.hint()
 
@@ -84,6 +97,8 @@ class GameActivity : AppCompatActivity() {
         view.text = (view.text.toString().toInt() - 1).toString()
       }
     }
+
+    timer.start()
   }
 
   override fun onPause() {
@@ -100,6 +115,61 @@ class GameActivity : AppCompatActivity() {
 
         putString(key, Json.encodeToString(dtoFromAdapter(board.adapter as BoardGridAdapter)))
       }
+    }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    if (timeRemaining != null) {
+      resumeTimer()
+    }
+  }
+
+  private fun resumeTimer() {
+    timer = getTimer()
+    timeRemaining = null
+    timer.start()
+  }
+
+  private fun getTimer(): CountDownTimer {
+    val difficulty = intent.getStringExtra(IntentExtraNames.DIFFICULTY)!!.let { Difficulty.valueOf(it) }
+    val millisInFuture = timeRemaining ?: when (difficulty) {
+      Difficulty.EASY -> TimeUnit.MINUTES.toMillis(3)
+      Difficulty.MEDIUM -> TimeUnit.MINUTES.toMillis(2)
+      Difficulty.HARD -> TimeUnit.MINUTES.toMillis(1)
+    }
+
+    return object : CountDownTimer(millisInFuture, 1000) {
+
+      override fun onTick(millisUntilFinished: Long) {
+        timeRemaining = millisUntilFinished
+
+        findViewById<TextView>(R.id.time_display).setTextColor(Color.WHITE)
+
+        var seconds = (millisUntilFinished / 1000).toInt()
+        val minutes = seconds / 60
+        seconds %= 60
+
+        val text = if (seconds < 10) {
+          "$minutes:0$seconds"
+        } else {
+          "$minutes:$seconds"
+        }
+
+        findViewById<TextView>(R.id.time_display).text = text
+
+        if (seconds <= 5) {
+          findViewById<TextView>(R.id.time_display).setTextColor(Color.RED)
+        }
+      }
+
+      override fun onFinish() {
+        cancel()
+        changeCurrentPlayer()
+        timeRemaining = null
+        resumeTimer()
+      }
+
     }
   }
 
@@ -124,6 +194,9 @@ class GameActivity : AppCompatActivity() {
       PlayerNumber.FIRST -> player1.name
       PlayerNumber.SECOND -> player2.name
     }
+
+    this@GameActivity.timeRemaining = timeRemaining
+    timer = getTimer()
   }
 
   private fun initDefault() {
@@ -148,6 +221,8 @@ class GameActivity : AppCompatActivity() {
       onWordSelectedCallback = { word, _ -> onWordSelected(word) },
       onGameEnded = { onGameEnded() }
     )
+
+    timer = getTimer()
   }
 
   private fun toMainMenu() {
@@ -164,7 +239,8 @@ class GameActivity : AppCompatActivity() {
       score = findViewById<TextView>(R.id.p2_score).text.toString().toInt()
     ),
     currentPlayer = currentPlayer,
-    board = adapter.toDto()
+    board = adapter.toDto(),
+    timeRemaining = timeRemaining
   )
 
   private fun changeCurrentPlayer() {
@@ -187,7 +263,10 @@ class GameActivity : AppCompatActivity() {
     }
 
     scoreView.text = (scoreView.text.toString().toInt() + word.length).toString()
+    timer.cancel()
     changeCurrentPlayer()
+    timeRemaining = null
+    timer.start()
   }
 
   @SuppressLint("CutPasteId")
