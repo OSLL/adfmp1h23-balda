@@ -40,15 +40,19 @@
   <string name="bot">Бот 🤖</string>
   <string name="yes">Да</string>
   <string name="no">Нет</string>
+  <string name="ok">Ок</string>
   <string name="resumeSavedGamePrompt">У вас есть незавершённая игра в этом режиме. Хотите продолжить?</string>
+  <string name="passTurnPrompt">Вы точно хотите завершить свой ход?</string>
+  <string name="exitToMenuPrompt">Вы точно хотите выйти в меню?</string>
 
   <string name="resume">Продолжить</string>
   <string name="time_remaining">Осталось времени:</string>
   <string name="current_player">Текущий игрок:</string>
-    <string name="turn_column">Ход:</string>
+  <string name="turn_column">Ход:</string>
 
   <string name="topic_common">Общая</string>
   <string name="topic_programming">Программирование</string>
   <string name="topic_dota2">Дота 2</string>
   <string name="topic_all">Все</string>
+  <string name="game_ended">Игра завершена</string>
 </resources>
