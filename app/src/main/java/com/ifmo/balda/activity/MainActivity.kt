@@ -1,6 +1,5 @@
 package com.ifmo.balda.activity
 
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -17,16 +16,15 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
-import androidx.fragment.app.DialogFragment
 import com.ifmo.balda.IntentExtraNames
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
+import com.ifmo.balda.TwoButtonsDialog
 import com.ifmo.balda.model.Difficulty
 import com.ifmo.balda.model.GameMode
 import com.ifmo.balda.model.data.Lang
@@ -166,7 +164,8 @@ class MainActivity : AppCompatActivity() {
     val savedGame = prefs.getString(savedGameKey, null)
 
     if (savedGame != null) {
-      ResumeSavedGameDialogFragment(
+      TwoButtonsDialog(
+        message = R.string.resumeSavedGamePrompt,
         onPositive = {
           startActivity(
             getGameActivityIntent(mode, savedGame, currentDifficulty(prefs), currentTopic(prefs))
@@ -254,20 +253,6 @@ class MainActivity : AppCompatActivity() {
 
   internal class TopicSelectorItem(val text: String) {
     override fun toString(): String = text
-  }
-
-  class ResumeSavedGameDialogFragment(
-    private val onPositive: () -> Unit,
-    private val onNegative: () -> Unit
-  ) : DialogFragment() {
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = activity?.let {
-      with(AlertDialog.Builder(it)) {
-        setMessage(R.string.resumeSavedGamePrompt)
-        setPositiveButton(R.string.yes) { _, _ -> onPositive() }
-        setNegativeButton(R.string.no) { _, _ -> onNegative() }
-        create()
-      }
-    } ?: throw IllegalStateException("Activity cannot be null")
   }
 }
 

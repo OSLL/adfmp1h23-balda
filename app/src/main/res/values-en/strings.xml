@@ -32,14 +32,19 @@ You can pause the game, and you can leave it unfinished: it will be saved for wh
   <string name="bot">Bot 🤖</string>
   <string name="yes">Yes</string>
   <string name="no">Nah</string>
+  <string name="ok">OK</string>
   <string name="resumeSavedGamePrompt">Your previous game is restored. Resume it?</string>
+  <string name="passTurnPrompt">Are you sure, you want to end your turn?</string>
+  <string name="exitToMenuPrompt">Are you sure, you want to exit to manu?</string>
 
   <string name="resume">Resume</string>
   <string name="time_remaining">Time left:</string>
   <string name="current_player">Current player:</string>
+  <string name="turn_column">Turn:</string>
 
   <string name="topic_common">Common</string>
   <string name="topic_programming">Prog</string>
   <string name="topic_dota2">Dota 2</string>
   <string name="topic_all">All</string>
+  <string name="game_ended">Game ended</string>
 </resources>

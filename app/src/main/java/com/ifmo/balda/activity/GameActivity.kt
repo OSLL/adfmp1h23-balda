@@ -9,13 +9,14 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import androidx.core.content.edit
 import com.ifmo.balda.IntentExtraNames
+import com.ifmo.balda.OneButtonDialog
 import com.ifmo.balda.PreferencesKeys
 import com.ifmo.balda.R
+import com.ifmo.balda.TwoButtonsDialog
 import com.ifmo.balda.adapter.BoardGridAdapter
 import com.ifmo.balda.db
 import com.ifmo.balda.model.Difficulty
@@ -35,7 +36,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
-
 
 class GameActivity : AppCompatActivity() {
   private val n = 8 // Depends on difficulty?
@@ -57,12 +57,20 @@ class GameActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_game)
 
-    findViewById<Button>(R.id.menu_button).setOnClickListener { toMainMenu() }
-
     if (this.intent.extras!!.getString(IntentExtraNames.SAVED_GAME) == null) {
       initDefault()
     } else {
       initFromSaved()
+    }
+
+    findViewById<Button>(R.id.menu_button).setOnClickListener {
+      timer.cancel()
+      TwoButtonsDialog(
+        message = R.string.exitToMenuPrompt,
+        onPositive = { toMainMenu() },
+        onNegative = { timer.start() },
+        onClose = { timer.start() }
+      ).show(supportFragmentManager, "Exit to menu confirmation dialog")
     }
 
     findViewById<Button>(R.id.pause_button).setOnClickListener {
@@ -79,11 +87,18 @@ class GameActivity : AppCompatActivity() {
       }
       startActivity(intent)
     }
-    findViewById<Button>(R.id.pass_button).setOnClickListener { /* TODO: Confirmation */
+    findViewById<Button>(R.id.pass_button).setOnClickListener {
       timer.cancel()
-      changeCurrentPlayer()
-      timeRemaining = null
-      resumeTimer()
+      TwoButtonsDialog(
+        message = R.string.passTurnPrompt,
+        onPositive = {
+          changeCurrentPlayer()
+          timeRemaining = null
+          resetTimer()
+        },
+        onNegative = { timer.start() },
+        onClose = { timer.start() }
+      ).show(supportFragmentManager, "Pass turn confirmation dialog")
     }
     findViewById<Button>(R.id.tip_button).setOnClickListener {
       val hintShown = fieldState.hint()
@@ -121,11 +136,11 @@ class GameActivity : AppCompatActivity() {
   override fun onResume() {
     super.onResume()
     if (timeRemaining != null) {
-      resumeTimer()
+      resetTimer()
     }
   }
 
-  private fun resumeTimer() {
+  private fun resetTimer() {
     timer = getTimer()
     timeRemaining = null
     timer.start()
@@ -167,9 +182,8 @@ class GameActivity : AppCompatActivity() {
         cancel()
         changeCurrentPlayer()
         timeRemaining = null
-        resumeTimer()
+        resetTimer()
       }
-
     }
   }
 
@@ -299,7 +313,10 @@ class GameActivity : AppCompatActivity() {
     }
 
     // TODO: Find a way to remove saved game
-    Toast.makeText(applicationContext, "Игра завершена", Toast.LENGTH_LONG).show()
-    toMainMenu()
+    OneButtonDialog(
+      message = R.string.game_ended,
+      onButtonClick = { toMainMenu() },
+      onClose = { toMainMenu() }
+    ).show(supportFragmentManager, "Game ended dialog")
   }
 }
