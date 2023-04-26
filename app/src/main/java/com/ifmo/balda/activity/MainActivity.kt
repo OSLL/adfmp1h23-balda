@@ -136,6 +136,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun initDifficultyBlock(prefs: SharedPreferences) {
     val difficultyChangeHandler = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+      buttonIdToDifficulty.keys.forEach { findViewById<RadioButton>(it).typeface = Typeface.DEFAULT }
       buttonView.typeface = if (isChecked) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
 
       if (isChecked) {
