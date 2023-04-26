@@ -154,7 +154,7 @@ class GameFieldState private constructor(
             val prefs = getSharedPreferences(PreferencesKeys.preferencesFileKey, Context.MODE_PRIVATE)
             dictionaries.loadDictionary(currentLanguage(prefs), topic, this)
           }
-          val frequencies = dictionary.values.map { it }.toSortedSet().toList()
+          val frequencies = dictionary.values.map { it }/*.toSortedSet()*/.toList().sorted()
           val difficultEnd = frequencies[frequencies.size / 3]
           val mediumEnd = frequencies[frequencies.size * 2 / 3]
 
